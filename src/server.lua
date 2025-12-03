@@ -14,21 +14,21 @@ local function receiver(sck, payload)
    -- Request‑Parsen (nur nach GET)
    print('receive')
    if string.find(payload, "GET "..sm) then
-      print('get')
+      print('GET '..sm)
       local resp = create(body1)
       sck:send(resp)
    else
       local resp = create(body2)
       sck:send(resp)
    end
-   print('send')
+--   print('send')
 end
 
 local function init()
    if not srv then srv=net.createServer(net.TCP,30) end
    srv:listen(80,function(socket)
       socket:on("receive", receiver )
-      socket:on("sent", function(sck) print('sent') sck:close() end)
+      socket:on("sent", function(sck) --[[print('sent')--]] sck:close() end)
    end )
    print("HTTP server running on port 80")
 end
