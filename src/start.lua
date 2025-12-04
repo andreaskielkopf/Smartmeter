@@ -1,26 +1,26 @@
 -- Auswahl der verschiedenen Funktionen die bereits programmiert wurden
 do
-   print ('doing start.lua')
-   local function call(fname)
-      print ('dofile(' .. fname .. '.lua)')
-      if file.exists(fname..'.lua') then         --         dofile(fname)
-         return require (fname)
-      else
-         print(fname .. ".lua not found")
-         return nil
-      end
-   end
-   --   print 'bme280, bme280_math, dht, enduser_setup, file, gpio, mdns, net, node, ow, rtctime, sjson, sntp, tmr, uart, ucg, wifi'
-   connect=call 'connect' -- Wifi-Verbindung herstellen
+   --   print ('doing start.lua')
+   --   local function call(f)
+   --      print ('dofile(' .. f ..')')
+   --      if file.exists(f..'.lc')  or file.exists(f..'.lua') then
+   --         return require (fname)
+   --      else
+   --         print(f2.. " not found")
+   --         f2=nil
+   --         return nil
+   --      end
+   --   end
+   connect=require 'connect' -- Wifi-Verbindung herstellen
    if not connect then return end -- abbruch
-   util=call 'util'
-   zeit=call 'zeit'
-   server=call 'server' -- server aufsetzen
+   --   util=call 'util'
+   zeit=require 'zeit'
+   server=require 'server' -- server aufsetzen
    connect.init() connect.run( function()
       if not server then return end -- abbruch
       zeit.init()
       server.init()
-      util.print3d(jetzt)
+      --      if util then util.print3d(jetzt) end
       print "Hallo Albershausen"
    end )
    --for k,v in pairs(_G) do print(k.." = "..v) end
