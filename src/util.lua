@@ -1,6 +1,7 @@
 -- Einige eigene funktionen
 local M={}
 local function print3d(v0)
+--   if not v0 then print 'nil' return end -- nullpointer
    if type(v0) ~= "table" then print(v0) return end
    if #v0 == 0 then print 'empty{}' return end
    for k1,v1 in pairs(v0) do
