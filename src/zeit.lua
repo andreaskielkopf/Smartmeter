@@ -7,7 +7,7 @@ do
       sec=sec or rtctime.get()-- if not sec then sec, usec, rate=rtctime.get() end
       local tb=rtctime.epoch2cal(sec)
       tb.unix=sec -- tabelle ergänzen um unix-timestamp
-      return tb end  
+      return tb end
 
    local function zeit(d) -- Tabelle in Zeitwerte für jetzt umwandeln
       d=d or dateTable() -- if not d then d = dateTable() end
@@ -19,20 +19,20 @@ do
          --         print(table.concat(t))
          print(table.concat({'heute ist ',heute,"(",stunde,":",minute,')'}))
       end
-      return { unix=d.unix, heute=heute, stunde=stunde, minute=minute }
-   end
+      return { unix=d.unix, heute=heute, stunde=stunde, minute=minute } end
 
    local was=0
    local function timeTicker(ti)
       local sec = rtctime.get() -- beachte nur die Änderung der Sekunden
-      if sec == was then return end
-      local t=dateTable(sec)
-      jetzt = zeit(t) -- global eintragen
-   end
-  
-   local function init() -- einmal pro Sekunde genauer brauchts nicht sein
+      if sec ~= was then
+         was=sec
+         local t=dateTable(sec)
+         jetzt = zeit(t) -- global eintragen
+      end end
+
+   local function init() -- 4 mal pro Sekunde genauer brauchts nicht sein ???
       sntp.sync(nil,nil,nil,1)
-      tmr.create():alarm(1000,tmr.ALARM_AUTO,timeTicker)
+      tmr.create():alarm(250,tmr.ALARM_AUTO,timeTicker)
    end
 
    -- Init sofort ausführen und nicht exportieren. Das schont den Heap
@@ -40,7 +40,6 @@ do
    init()
    M.get=zeit
    M.dateTable=dateTable
-   M.jetzt=jetzt
-   --M.jetzt=jetzt
+   M.jetzt=jetzt   
    return M
 end
