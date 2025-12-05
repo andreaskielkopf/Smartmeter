@@ -1,34 +1,26 @@
 -- Auswahl der verschiedenen Funktionen die bereits programmiert wurden
 do
-   --   print ('doing start.lua')
-   --   local function call(f)
-   --      print ('dofile(' .. f ..')')
-   --      if file.exists(f..'.lc')  or file.exists(f..'.lua') then
-   --         return require (fname)
-   --      else
-   --         print(f2.. " not found")
-   --         f2=nil
-   --         return nil
-   --      end
-   --   end
    connect=require 'connect' -- Wifi-Verbindung herstellen
-   if not connect then return end -- abbruch
-   --   util=call 'util'
-   zeit=require 'zeit'
-   server=require 'server' -- server aufsetzen
-   connect.init() connect.run( function()
-      if not server then return end -- abbruch
-      zeit.init()
-      server.init()
+   --   connect.init() ist bereits includiert
+   --   if not connect then return end -- abbruch
+   if connect.gotIP() then -- Das ist zwar aufwändig, spart aber Heap !!!
+      print 'unload connect'
+      connect=nil -- connect trennen
+      package.loaded.connect=nil -- connect unload spart 3k auf dem Heap
+   end
+
+   -- Eine extra funktion für main zu verwenden ist aufwändige,
+   -- erlaubt es aber nach dem Verbindungsaufbau die Methoden für connect wieder zu entladen
+   -- Das entlastet den Heap erheblich
+   local function main()
+      print 'lade zeit'
+      zeit=require 'zeit' -- init() included
+      print 'lade server'
+      server=require 'server' -- server aufsetzen init() included
       --      if util then util.print3d(jetzt) end
       print "Hallo Albershausen"
-   end )
-   --for k,v in pairs(_G) do print(k.." = "..v) end
-
-   --   call('wifi.lua')
-   -- if file.exists('smart_count.lua') then dofile('smart_count.lua') end
-   -- if file.exists('blinker.lua') then dofile('blinker.lua') end
-   -- if file.exists('blinker.lua') then dofile('blinker.lua') end
-   -- if file.exists('blinker.lua') then dofile('blinker.lua') end
-   -- if file.exists('blinker.lua') then dofile('blinker.lua') end
+   end
+   print ('starte main',connect)
+   -- wenn connect noch geladen ist, warte 30 Sekunden bis die Verbindung steht
+   if connect then connect.runLater(main,30) else main() end -- sonst sofort starten
 end
