@@ -1,136 +1,79 @@
--- wifi initialisiwen, so dass ein server gestartet werden kann
+-- wifi initialisiren, so dass ein server gestartet werden kann
+do
+   local M={}
 
-local M = {}
+   local function gotIP() -- ist eine Verbindung da, und eine IP auch
+      return wifi.sta.status() == wifi.STA_GOTIP end
 
-local function printStatus()
-   local status=wifi.sta.status()
-   if status == wifi.STA_GOTIP then
+   local function printStatus() -- Zeigde die Daten der Verbindung an (wenn möglich)
+      if not gotIP() then return false end
       local cfg=wifi.sta.getconfig(true)
       if cfg then
          print ("\tStation config")
-         print ("\tssid    :" .. cfg.ssid)
-         print ("\tpassword:" .. cfg.pwd)
-         print ("\tbssid   :" .. cfg.bssid)
+         print ("\tssid    :", cfg.ssid)
+         print ("\tpassword:", cfg.pwd)
+         print ("\tbssid   :", cfg.bssid)
          cfg=nil
       end
-      print ("\tVerbunden mit " .. wifi.sta.getip())
-      return true -- status
-   else
-      return false -- or nil ???
-   end
-end
+      print ("\tVerbunden mit ", wifi.sta.getip())
+      return true end
 
-local eus=nil
-local eus_file='eus_params.lua'
-local function eusRead()
-   if file.exists(eus_file) then
-      if not eus then
-         print ('read file ' .. eus_file)
-         eus = dofile(eus_file) -- Callbacks definieren
-         eus.connected_cb       = function() print "Wifi connected"    end
-         eus.disconnected_cb    = function() print "Connection lost"   end
-         eus.got_ip_cb          = function() print "IP erhalten "      end
-         eus.authmode_change_cb = function() print "Auth mode changed" end
-         eus.dhcp_timeout       = function() print "DHCP timeout"      end
-      end
-      return eus end
-   return nil
-end
-
-local function init()
-   if not printStatus() then
-      eus= eusRead()
-      if eus then         --         print 'init Connection'
-         wifi.sta.config(eus)
-         return printStatus() end
-   end
-end
-
--- local function eu_store_wifi() end
---[[ local function eu_Setup()
-      print "eu_Setup"
-      erg= enduser_setup.start(
-         'Smartmeter',
-         function()
-            print("Connected to WiFi as:" .. wifi.sta.getip())
-            -- store_wifi()
-         end,
-         function(err, str)
-            print("enduser_setup: Err #" .. err .. ": " .. str)
-         end,
-         function(str)
-            print ('ERR:' .. str)
+   local eus=nil
+   local function eusRead() -- lade die Verbindungsdaten aus dem Dateisystem
+      local eus_file='eus_params.lua'
+      if file.exists(eus_file) then
+         if not eus then
+            print ('read file ' , eus_file)
+            eus=dofile(eus_file) -- Callbacks definieren
+            eus.connected_cb       = function() print "Wifi connected"    end
+            eus.disconnected_cb    = function() print "Connection lost"   end
+            eus.got_ip_cb          = function() print "IP erhalten "      end
+            eus.authmode_change_cb = function() print "Auth mode changed" end
+            eus.dhcp_timeout       = function() print "DHCP timeout"      end
          end
-      -- print("nix") -- Lua print function can serve as the debug callback),
-      )
-      print ("erg:")
-      print (erg)
-   end --]]
--- if not file.exists('eus_params.lua') then
---erg = eu_Setup()
--- end
--- Config laden und automatisch verbinden
--- funktion um das Hauptprogramm nur zu starten, wenn wifi verbunden werden kann
+         return eus end
+      return nil end
 
-local function runOnCon(main)
-   local retries=30
-   tmr.create():alarm(500,tmr.ALARM_AUTO, function (t)
-      local status= printStatus() -- dokumentieren
-      if not status then
-         if retries > 0 then
-            print ("Warte "..retries.." auf Wlan")
-            retries=retries-1
-            return
+   local function init() -- stelle die Verbindung her, wenn nicht schon da
+      if not printStatus() then
+         eus=eusRead() -- Verbindungsdaten laden
+         if eus then
+            wifi.sta.config(eus)-- verbinden
+            return printStatus()-- tailcall
          end end
-      t:stop()
-      t:unregister()
-      retries=nil
-      if status then
-         status=nil
-         main() -- Weiter im Hauptprogramm
-      else
-         print ("Timeout: Verbindung fehlgeschlagen ")
-         -- Fehlerbehandlung  in 5 Minuten erneut ?--
-         --         print ("Programm wird beendet")
-      end end ) end
+   return false end
 
---local function runOnConnection(main)
---   local retries=20
---   tmr.create():alarm(500,tmr.ALARM_AUTO,
---      function(ti)
---         status=wifi.sta.status()
---         if status == wifi.STA_GOTIP then
---            ti:stop()
---            ti:unregister()
---            local cfg=wifi.sta.getconfig(true)
---            if cfg then
---               print ("\tCurrent station config")
---               print ("\tssid    :" .. cfg.ssid)
---               print ("\tpassword:" .. cfg.pwd)
---               print ("\tbssid   :" .. cfg.bssid)
---            end
---            print ("\tVerbunden mit " .. wifi.sta.getip())
---            main() -- Weiter im Hauptprogramm
---         else
---            if retries <= 0 then
---               print ("Timeout: Verbindung fehlgeschlagen ")
---               ti:stop()
---               ti:unregister()
---               -- Fehlerbehandlung  in 5 Minuten erneut ?--
---               print ("Programm wird beendet")
---            else
---               print ("Warte auf Wlan " .. status .. " noch " .. retries)
---               retries=retries-1
---            end
---         end
---      end
---   )
---end
+   local function runLater(main,retries) -- starte main, sobald die Verbindung steht
+      if gotIP() then return main() end -- tailcall
+      local retries=retries or 30 -- default sind 30 Sekunden
+      tmr.create():alarm(1000,tmr.ALARM_AUTO, function (t)
+         if not gotIP() and retries > 0 then
+            print ("Warte ", retries, " auf Wlan")
+            retries=retries-1
+            return -- ein weiteres mal versuchen
+         end
+         t:stop() t:unregister() -- t=nil ???
+         retries=nil
+         if printStatus() then
+            return main() -- Weiter im Hauptprogramm
+         else
+            print ("Timeout: Verbindung fehlgeschlagen")
+            -- Fehlerbehandlung  in 5 Minuten erneut ?
+            -- print ("Programm wird beendet")
+            return false
+         end end ) end
 
---M.eus=eus
---M.printStatus=printStatus
---M.eusRead=eusRead
-M.init=init
-M.run=runOnCon
--- usage: M.init() M.run( function() print "Hallo Albershausen" end )
-return M
+   init()
+   -- if not gotIP() then init() end
+   -- um den Heap zu schonen wird init sofort ausgeführt, und nicht exportiert
+   -- Das hat ca. 2k Heap gespart !!!
+   -- M.init=init
+   M.gotIP=gotIP
+   M.runLater=runLater
+   -- usage:
+   -- runLater(function() print "Hallo Albershausen" end, 15)
+   -- runLater(main)
+   -- if gotIP() then main() else runLater(main, 20) end
+   return M
+end
+
