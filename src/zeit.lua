@@ -1,13 +1,19 @@
 -- Eine Interne Uhr auf dem laufenden halten
+
 jetzt={} -- globale zeittabelle anlegen
+-- jetzt.heute  string 2025-12-01
+-- jetzt.stunde int
+-- jetzt.minute int
+-- jetzt.unix   unix time in sekunden
 do
    local M={}
+--   local last={}
 
    local function dateTable(sec) -- unix-Zeit in Tabelle umwandeln
       sec=sec or rtctime.get()-- if not sec then sec, usec, rate=rtctime.get() end
-      local tb=rtctime.epoch2cal(sec)
-      tb.unix=sec -- tabelle ergänzen um unix-timestamp
-      return tb end
+      local d=rtctime.epoch2cal(sec)
+      d.unix=sec -- tabelle ergänzen um unix-timestamp
+      return d end
 
    local function zeit(d) -- Tabelle in Zeitwerte für jetzt umwandeln
       d=d or dateTable() -- if not d then d = dateTable() end
@@ -21,7 +27,7 @@ do
       end
       return { unix=d.unix, heute=heute, stunde=stunde, minute=minute } end
 
-   local was=0
+   local was=0 -- letzter unix-timestamp
    local function timeTicker(ti)
       local sec = rtctime.get() -- beachte nur die Änderung der Sekunden
       if sec ~= was then
@@ -34,7 +40,6 @@ do
       sntp.sync(nil,nil,nil,1)
       tmr.create():alarm(250,tmr.ALARM_AUTO,timeTicker)
    end
-
    -- Init sofort ausführen und nicht exportieren. Das schont den Heap
    -- M.init=init
    init()
