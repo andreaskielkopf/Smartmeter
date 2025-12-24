@@ -12,10 +12,8 @@ do
    -- Eine extra funktion für main zu verwenden ist aufwändige,
    -- erlaubt es aber nach dem Verbindungsaufbau die Methoden für connect wieder zu entladen
    -- Das entlastet den Heap erheblich
-   local function main()
-      print 'lade zeit'
-      zeit=require 'zeit' -- init() included
-      print 'lade server'
+   local function main()      
+      zeit=require 'zeit' -- init() included      
       server=require 'server' -- server aufsetzen init() included
       --      if util then util.print3d(jetzt) end
       print "Hallo Albershausen"

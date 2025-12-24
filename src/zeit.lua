@@ -6,8 +6,9 @@ jetzt={} -- globale zeittabelle anlegen
 -- jetzt.minute int
 -- jetzt.unix   unix time in sekunden
 do
+   print "lade zeit"
    local M={}
---   local last={}
+   --   local last={}
 
    local function dateTable(sec) -- unix-Zeit in Tabelle umwandeln
       sec=sec or rtctime.get()-- if not sec then sec, usec, rate=rtctime.get() end
@@ -45,6 +46,7 @@ do
    init()
    M.get=zeit
    M.dateTable=dateTable
-   M.jetzt=jetzt   
+   M.jetzt=jetzt
+   print "end zeit"
    return M
 end
