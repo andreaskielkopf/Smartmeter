@@ -27,6 +27,18 @@ do
       if file.exists(lua) then return lua end
       return nil end
 
+   --   local function printPT()
+   --      local p=node.getpartitiontable()
+   --      local q={}
+   --      for _,k in ipairs{'lfs_addr','lfs_size','spiffs_addr','spiffs_size'} do
+   --         table.insert(q,#q+1,k)         table.insert(q,#q+1,p[k])
+   --      end
+   --      print(table.concat(q,"\t"))
+   --      --      print3d(q)
+   --   end
+   --   M.printPT=printPT
+   --   printPT()
+
    M.fName=fName
    M.print3d=print3d
    return M
