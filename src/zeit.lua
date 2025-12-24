@@ -7,8 +7,7 @@ jetzt={} -- globale zeittabelle anlegen
 -- jetzt.unix   unix time in sekunden
 do
    print "lade zeit"
-   local M={}
-   --   local last={}
+   local M={}   
 
    local function dateTable(sec) -- unix-Zeit in Tabelle umwandeln
       sec=sec or rtctime.get()-- if not sec then sec, usec, rate=rtctime.get() end
