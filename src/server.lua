@@ -1,11 +1,15 @@
 -- server für smartmeter-daten
 do
+   print "lade server"
    local M={}
-   local sm    ='/smartmeter'
-   local sm_heap=table.concat({sm,"/heap"})
+   local data=require 'data'
+   local sm=require 'smartmeter'
+   local sm_    ='/smartmeter'
+   local sm_heap=table.concat({sm_,"/heap"})
+   local sm_info=table.concat({sm_,"/info"})
    --local icon  ='/favicon'
    --   local body1 =table.concat({'{\"', sm, '":"heap","2025-12-01",3,4,5,6,7,8,9,10}'})
-   local usage =table.concat({"<html><body><h1>NodeMCU</h1><p>Use ", sm, "</p></body></html>"})
+   local usage =table.concat({"<html><body><h1>NodeMCU</h1><p>Use ", sm_, "</p></body></html>"})
 
    local function create(b)
       return table.concat({
@@ -16,8 +20,10 @@ do
       if pfad then
          if pfad:find(sm_heap) then return
             table.concat({'{"Heap":', node.heap(), '}'}) end -- tailcall
-         if pfad:find(sm) then return
-            table.concat({'{\"', sm, '":"heap","2025-12-01",3,4,5,6,7,8,9,10}'}) end -- tailcall
+         if pfad:find(sm_info) then return
+            table.concat({'{"Info":', sm.info(pfad:match("/info(.*)")) ,'}'}) end -- tailcall ???
+            if pfad:find(sm_) then return
+               table.concat({'{\"', sm_, '":"heap","2025-12-01",3,4,5,6,7,8,9,10}'}) end -- tailcall
             --      if pfad:find(icon) then return nil end -- nicht unterstützt
       end
       return usage end
@@ -42,6 +48,7 @@ do
          socket:on("sent", function(sck) sck:close() sck=nil end)
       end )
       print("HTTP server running on port 80")
+      --      smartmeter.init()
    end
 
    --local function setData(data)
@@ -57,5 +64,6 @@ do
    --M.setBody=setBody
    --M.setData=setData
    -- usage: M.init()
+   print "end server"
    return M
 end
