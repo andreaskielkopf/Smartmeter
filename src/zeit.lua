@@ -20,35 +20,28 @@ do
       local heute = string.format("%d-%02d-%02d", d.year,d.mon,d.day)
       local stunde = d.hour
       local minute = d.min
-      if minute ~= jetzt.minute then
-         if smart then
+      if minute ~= jetzt.minute and smart then
             smart.next(heute,stunde,minute) -- Minute weiterschalten (neue Werte)
          end
-         --         local t={'heute ist ',heute,"(",stunde,":",minute,')'}
-         --         print(table.concat(t))
-         --         print(table.concat({'heute ist ',heute,"(",stunde,":",minute,')'}))
-      end
       return { unix=d.unix, heute=heute, stunde=stunde, minute=minute } end
 
    local was=0 -- letzter unix-timestamp
    local function timeTicker(ti)
       local sec = rtctime.get() -- beachte nur die Änderung der Sekunden
       if sec ~= was then
-         was=sec
-         local t=dateTable(sec)
-         jetzt = zeit(t) -- global eintragen
+         was=sec         
+         jetzt = zeit(dateTable(sec)) -- global eintragen
       end end
 
    local function init() -- 4 mal pro Sekunde genauer brauchts nicht sein ???
       sntp.sync(nil,nil,nil,1)
       tmr.create():alarm(250,tmr.ALARM_AUTO,timeTicker)
    end
-   -- Init sofort ausführen und nicht exportieren. Das schont den Heap
-   -- M.init=init
+   -- Init sofort ausführen und nicht exportieren. Das schont den Heap   
    init()
    M.get=zeit
    M.dateTable=dateTable
-   M.jetzt=jetzt
+--   M.jetzt=jetzt
    print "end zeit"
    return M
 end
