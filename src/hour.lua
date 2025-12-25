@@ -1,6 +1,6 @@
 do
-   local M={}
    print "load hour"
+   local M={}
    local util_=require 'util'
    local zeit_=require 'zeit' -- aber es dauert einige Zeit bis today aktuell ist !!!
 
@@ -45,18 +45,6 @@ do
 
    -- Tabelle {Stunde, {0 bis zu 60 x(Takte je Minute)}}
    local function hourToLua(h) -- Aufruf mit einer StundenTabelle
-      --      local stunde=h[1] or 0
-      --      local takte=h[2] or {}
-      --      --      print ('HourToLine:',h,type(stunde),type(takte))
-      --      local buf={}
-      --      for i=60,1,-1 do -- 60 Minuten rückwärts zuweisen in den buffer
-      --         if takte[i] and takte[i]>0 then
-      --            table.insert(buf,1,takte[i]) -- alles andere nach rechts schieben
-      --      elseif #buf>0 then
-      --         table.insert(buf,1,'0')
-      --      end end
-      --      local line=table.concat({"hour{", stunde, ",{", table.concat(buf,','), "}}"})
-      --      return line
       local stunde, ticks= hourToTable(h)
       return table.concat({'hour{', stunde, ',{', ticks, '}}'})
    end
@@ -70,24 +58,23 @@ do
    local function hourAppend(datum,stunde)
       local lua=table.concat({datum,'.lua'})
       if stunde and file.exists(lua) then
-         local line=hourToLua(stunde)
-         print (datum,line)
+         --         print (datum,hourToLua(stunde))
          local f=file.open(lua,"a")
-         f:write(line)
+         f:write(hourToLua(stunde))
          f:write('\n')
          f:close()
          f=nil end end
 
-   local function test()
-      local erg=getHour('2025-12-01',4)
-      --      print (erg,type(erg[1]),type(erg[2]))
-      print ('test hour Lua:', hourToLua(erg))
-      print ''
-      print ('test hour Json:', hourToJson(erg))
-      print ''
-   end
+   --   local function test()
+   --      local erg=getHour('2025-12-01',4)
+   --      --      print (erg,type(erg[1]),type(erg[2]))
+   --      print ('test hour Lua:', hourToLua(erg))
+   --      print ''
+   --      print ('test hour Json:', hourToJson(erg))
+   --      print ''
+   --   end
 
-   M.test=test
+   --   M.test=test
    M.get=getHour        -- Datensatz für eine Stunde
    M.append=hourAppend
    M.toLua=hourToLua      -- diese Stunde Serialisieren
