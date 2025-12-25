@@ -1,5 +1,6 @@
 -- Auswahl der verschiedenen Funktionen die bereits programmiert wurden
 do
+   require '_init' -- bind das LFS ein
    connect=require 'connect' -- Wifi-Verbindung herstellen
    --   connect.init() ist bereits includiert
    --   if not connect then return end -- abbruch
