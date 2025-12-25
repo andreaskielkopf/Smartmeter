@@ -1,12 +1,12 @@
 -- server für smartmeter-daten
 do
-   print "lade server"
+   print "load server"
    local M={}
    local data=require 'data'
    local sm=require 'smartmeter'
    local sm_    ='/smartmeter'
    local sm_heap=table.concat({sm_,"/heap"})
-   local sm_info=table.concat({sm_,"/info"})
+   local sm_data=table.concat({sm_,"/data"})
    --local icon  ='/favicon'
    --   local body1 =table.concat({'{\"', sm, '":"heap","2025-12-01",3,4,5,6,7,8,9,10}'})
    local usage =table.concat({"<html><body><h1>NodeMCU</h1><p>Use ", sm_, "</p></body></html>"})
@@ -20,10 +20,10 @@ do
       if pfad then
          if pfad:find(sm_heap) then return
             table.concat({'{"Heap":', node.heap(), '}'}) end -- tailcall
-         if pfad:find(sm_info) then return
-            table.concat({'{"Info":', sm.info(pfad:match("/info(.*)")) ,'}'}) end -- tailcall ???
+         if pfad:find(sm_data) then return
+            table.concat({'{"Data":', sm.data(pfad:match("/data(.*)")) ,'}'},'\n') end -- tailcall ???
             if pfad:find(sm_) then return
-               table.concat({'{\"', sm_, '":"heap","2025-12-01",3,4,5,6,7,8,9,10}'}) end -- tailcall
+               table.concat({'{"', sm_, '/{heap, data/2025-12-01}'}) end -- tailcall
             --      if pfad:find(icon) then return nil end -- nicht unterstützt
       end
       return usage end
