@@ -34,7 +34,7 @@ do
       local answer=fetch(pfad)
       sck:send(create(answer))
       if answer==usage then answer="" end
-      print('receive ',pfad," > ",answer)
+--      print('receive ',pfad," > ",answer)
    end
 
    local srv
