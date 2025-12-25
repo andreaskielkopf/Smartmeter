@@ -67,6 +67,17 @@ do
       return table.concat({'{"hour":', stunde, ', "ticks":[', ticks, ']}'})
    end
 
+   local function hourAppend(datum,stunde)
+      local lua=table.concat({datum,'.lua'})
+      if stunde and file.exists(lua) then
+         local line=hourToLua(stunde)
+         print (datum,line)
+         local f=file.open(lua,"a")
+         f:write(line)
+         f:write('\n')
+         f:close()
+         f=nil end end
+
    local function test()
       local erg=getHour('2025-12-01',4)
       --      print (erg,type(erg[1]),type(erg[2]))
@@ -78,6 +89,7 @@ do
 
    M.test=test
    M.get=getHour        -- Datensatz für eine Stunde
+   M.append=hourAppend
    M.toLua=hourToLua      -- diese Stunde Serialisieren
    M.toJson=hourToJson
    print "end hour"
