@@ -14,7 +14,7 @@ do
       local filename=util_.fName(datum)
       local stunden={} -- Tabelle mit den Stunden ist erstmal leer
       local erg={datum,stunden}
---      print (filename or datum)
+      --      print (filename or datum)
       if filename then -- die datei gibt es
          function date(d) -- date interpretieren
             if #d >= 1 then erg[1]=d[1] end end
@@ -70,17 +70,36 @@ do
       end
       return lines end
 
+   local function dayCreate(datum) -- erzeugt die datei für den aktuellen Tag
+      if not util_.fName(datum) and datum and #datum==10 then -- nur wenn es ein heute gibt
+         local lines=dayToLua(getDay(datum))
+         --            lines[#lines+1]=""
+         --            print ('create day Lua:',datum,'\n', table.concat(lines,'\n'))
+         local f=file.open(table.concat({datum,'.lua'}),"a")
+         f:write(table.concat(lines,'\n'))
+         f:write('\n')
+         f:close()
+         f=nil end
+   return getDay(datum) end  --vorhandene Datei übergeben
+
+   local function dayCompile(datum)
+      print 'dayCompile not implemented jet'
+   end
+
    local function test()
       local erg=getDay('2025-12-01') -- Tabelle {Tag, {Stunde1, Stunde2, Stunde3 ...}
       --      print ('test dayx:',erg,erg[1] )
       print ('test day Lua:',table.concat( dayToLua(erg),'\n'))
       print ''
       print ('test day Json:',table.concat( dayToJson(erg),'\n'))
-      print ''      
+      print ''
    end
 
    M.test=test
-   M.get=getDay      -- Datensatz für einen Tag
+   M.get=getDay       -- Datensatz für einen Tag
+   --   M.getFile=getFile
+   M.create=dayCreate -- und Datei sicherstellen
+   M.compile=dayCompile
    M.toLua=dayToLua  -- diesen Tag Serialisieren
    M.toJson=dayToJson
    print 'end day'
