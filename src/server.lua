@@ -23,7 +23,7 @@ do
          if pfad:find(sm_data) then return
             table.concat({'{"Data":', sm.data(pfad:match("/data(.*)")) ,'}'},'\n') end -- tailcall ???
             if pfad:find(sm_) then return
-               table.concat({'{"', sm_, '/{heap, data/2025-12-01}'}) end -- tailcall
+               table.concat({'{"', sm_, '/{heap, data/2025/12/01}'}) end -- tailcall
             --      if pfad:find(icon) then return nil end -- nicht unterstützt
       end
       return usage end
