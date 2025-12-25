@@ -1,6 +1,6 @@
 do
-   local M={}
    print "load day"
+   local M={}
    local util_=require 'util'
    local zeit_=require 'zeit' -- aber es dauert einige Zeit bis today aktuell ist !!!
    local hour_=require 'hour'
@@ -22,11 +22,11 @@ do
             if #h == 2 and type(h[2])=='table' then
                local uhr=h[1] -- uhrzeit
                local takte={} -- array
-               local stunde={uhr,takte}
+               --               local stunde={uhr,takte}
                for k,v in pairs(h[2]) do
                   if v>0 then takte[k]=v end
                end
-               stunden[uhr]=stunde -- ganze stunde zuweisen
+               stunden[uhr]={uhr,takte} -- ganze stunde zuweisen
                --               print('uhr',type(stunde),#stunden)
          end end
          dofile(filename) -- print ("done",filename)
@@ -39,23 +39,20 @@ do
       local lines={}
       if day and day[1] then
          --         print('day:', day[1])
-         lines[#lines+1]=table.concat({"date{'",day[1],"'}"})
+         lines[1]=table.concat({"date{'",day[1],"'}"})
          local stunden=day[2]
          --         print('stunden',type(stunden),#stunden,#day)
          if type(stunden)=='table' and #stunden>0 then
             for i=0,24 do
                if stunden[i] then
-                  local line=hour_.toLua(stunden[i])
-                  lines[#lines+1]=line
+                  lines[#lines+1]=hour_.toLua(stunden[i])
                end end end end
       return lines end
 
    local function dayToJson(day) -- consumer = verbraucht die daten und liefert ein array mit textzeilen
-      local lines={}
       if day and day[1] then
          --         print('day:', day[1])
-         lines[#lines+1]=table.concat({'{"date":"',day[1],'",'})
-         lines[#lines+1]='"hours":['
+         local lines={table.concat({'{"date":"',day[1],'",'}),'"hours":['}
          local stunden=day[2]
          --         print('stunden',type(stunden),#stunden,#day)
          if type(stunden)=='table' and #stunden>0 then
@@ -63,43 +60,39 @@ do
                if stunden[i] then
                   local line= hour_.toJson(stunden[i])
                   if #lines==2 then lines[#lines+1]=line
-                  else lines[#lines+1]=table.concat({',',line}) end
-               end end
-         end
+                  else lines[#lines+1]=table.concat({',',line})
+                  end end end end
          lines[#lines+1]=']}'
-      end
-      return lines end
+         return lines end
+   return {} end
 
    local function dayCreate(datum) -- erzeugt die datei für den aktuellen Tag
       if not util_.fName(datum) and datum and #datum==10 then -- nur wenn es ein heute gibt
-         local lines=dayToLua(getDay(datum))
-         --            lines[#lines+1]=""
-         --            print ('create day Lua:',datum,'\n', table.concat(lines,'\n'))
+         -- print ('create day Lua:',datum,'\n', table.concat(dayToLua(getDay(datum)),'\n'))
          local f=file.open(table.concat({datum,'.lua'}),"a")
-         f:write(table.concat(lines,'\n'))
+         f:write(table.concat(dayToLua(getDay(datum)),'\n'))
          f:write('\n')
          f:close()
          f=nil end
    return getDay(datum) end  --vorhandene Datei übergeben
 
-   local function dayCompile(datum)
-      print 'dayCompile not implemented jet'
-   end
+   --   local function dayCompile(datum)
+   --      print 'dayCompile not implemented jet'
+   --   end
 
-   local function test()
-      local erg=getDay('2025-12-01') -- Tabelle {Tag, {Stunde1, Stunde2, Stunde3 ...}
-      --      print ('test dayx:',erg,erg[1] )
-      print ('test day Lua:',table.concat( dayToLua(erg),'\n'))
-      print ''
-      print ('test day Json:',table.concat( dayToJson(erg),'\n'))
-      print ''
-   end
+   --   local function test()
+   --      local erg=getDay('2025-12-01') -- Tabelle {Tag, {Stunde1, Stunde2, Stunde3 ...}
+   --      --      print ('test dayx:',erg,erg[1] )
+   --      print ('test day Lua:',table.concat( dayToLua(erg),'\n'))
+   --      print ''
+   --      print ('test day Json:',table.concat( dayToJson(erg),'\n'))
+   --      print ''
+   --   end
 
-   M.test=test
+   --   M.test=test
    M.get=getDay       -- Datensatz für einen Tag
-   --   M.getFile=getFile
    M.create=dayCreate -- und Datei sicherstellen
-   M.compile=dayCompile
+   --   M.compile=dayCompile
    M.toLua=dayToLua  -- diesen Tag Serialisieren
    M.toJson=dayToJson
    print 'end day'
