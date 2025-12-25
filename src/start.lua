@@ -17,8 +17,7 @@ do
       server=require 'server' -- server aufsetzen init() included
       --      if util then util.print3d(jetzt) end
       print "Hallo Albershausen"
-      smart=require 'smartmeter'
-      smart.init()
+      smart=require 'smartmeter' -- globaler Zugriff auf smart !!!      
    end
    print ('starte main',connect)
    -- wenn connect noch geladen ist, warte 30 Sekunden bis die Verbindung steht
