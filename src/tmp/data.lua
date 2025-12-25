@@ -1,14 +1,8 @@
-meter={}
---data={}
 do
-   local M={}
    print "load data"
-   local util=require 'util'
-   local zeit=require 'zeit' -- aber es dauert einige Zeit bis today aktuell ist !!!
---   local hour=require 'hour'
---   local day =require 'day'
-
-   
+   local M={}
+   local util_=require 'util'
+   local zeit_=require 'zeit' -- aber es dauert einige Zeit bis today aktuell ist !!!
 
    -- Übergeben werden nested tables
    local function toLine2(data)
@@ -104,6 +98,6 @@ do
    --   M.writeDay=writeDay
    --   M.writeHour=writeHour
 
-   print "end data"
+   pri nt "end data"
    return M
 end

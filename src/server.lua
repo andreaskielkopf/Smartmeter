@@ -2,7 +2,7 @@
 do
    print "load server"
    local M={}
-   local data=require 'data'
+--   local data=require 'data'
    local sm=require 'smartmeter'
    local sm_    ='/smartmeter'
    local sm_heap=table.concat({sm_,"/heap"})
