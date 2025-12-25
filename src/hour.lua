@@ -71,7 +71,9 @@ do
       local erg=getHour('2025-12-01',4)
       --      print (erg,type(erg[1]),type(erg[2]))
       print ('test hour Lua:', hourToLua(erg))
+      print ''
       print ('test hour Json:', hourToJson(erg))
+      print ''
    end
 
    M.test=test

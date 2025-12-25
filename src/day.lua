@@ -4,7 +4,7 @@ do
    local util_=require 'util'
    local zeit_=require 'zeit' -- aber es dauert einige Zeit bis today aktuell ist !!!
    local hour_=require 'hour'
-   
+
    -- liefert den Datensatz eines Tages aus den vorhanden Dateien,
    -- oder einen leeren Datensatz für diesen Tag als verschachtelte Tabelle
    -- Tabelle {Tag, {Stunde1, Stunde2, Stunde3 ...}
@@ -14,7 +14,7 @@ do
       local filename=util_.fName(datum)
       local stunden={} -- Tabelle mit den Stunden ist erstmal leer
       local erg={datum,stunden}
-      print (filename or datum)
+--      print (filename or datum)
       if filename then -- die datei gibt es
          function date(d) -- date interpretieren
             if #d >= 1 then erg[1]=d[1] end end
@@ -73,11 +73,10 @@ do
    local function test()
       local erg=getDay('2025-12-01') -- Tabelle {Tag, {Stunde1, Stunde2, Stunde3 ...}
       --      print ('test dayx:',erg,erg[1] )
-      local b=dayToLua(erg)
-      --      print ('b=',type(b),#b)
-      --      for k,v in pairs(b) do print(v) end
-      print ('test day:',table.concat(b,'\n'))
-      --      print ('test day', b)
+      print ('test day Lua:',table.concat( dayToLua(erg),'\n'))
+      print ''
+      print ('test day Json:',table.concat( dayToJson(erg),'\n'))
+      print ''      
    end
 
    M.test=test
