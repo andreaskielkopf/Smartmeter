@@ -1,8 +1,8 @@
 do
    local M={}
    print "load hour"
-   local util=require 'util'
-   local zeit=require 'zeit' -- aber es dauert einige Zeit bis today aktuell ist !!!
+   local util_=require 'util'
+   local zeit_=require 'zeit' -- aber es dauert einige Zeit bis today aktuell ist !!!
 
    -- liefert den Datensatz für die angegebene Stunde aus den vorhandenen Dateien
    -- oder einen leeren Datensatz für diese Stunde als Liste (einfach durchnummeriert)
@@ -11,7 +11,7 @@ do
    local function getHour(tag,stunde) -- aufruf mit dem gewünschten datum
       tag=tag or jetzt.heute or '2025-12-01'
       stunde=stunde or jetzt.stunde or 15 -- default 14:00 Uhr bis 14:59
-      local filename= util.fName(tag)
+      local filename= util_.fName(tag)
       local erg
       --      print ("getHour:",filename or tag,stunde)
       if filename then
