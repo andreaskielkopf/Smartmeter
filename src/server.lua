@@ -24,7 +24,6 @@ do
             table.concat({'{"Data":', sm.data(pfad:match("/data(.*)")) ,'}'},'\n') end -- tailcall ???
             if pfad:find(sm_) then return
                table.concat({'{"', sm_, '/{heap, data/2025/12/01}'}) end -- tailcall
-            --      if pfad:find(icon) then return nil end -- nicht unterstützt
       end
       return usage end
 
@@ -33,34 +32,24 @@ do
       payload=nil
       local answer=fetch(pfad)
       sck:send(create(answer))
-      if answer==usage then answer="" end
---      print('receive ',pfad," > ",answer)
+      --      if answer==usage then answer="" end
+      --      print('receive ',pfad," > ",answer)
    end
 
-   local srv
    local function init(timeout)
-      timeout=timeout or 30
       print('server init')
+      timeout=timeout or 30
       srv =srv or net.createServer(net.TCP,timeout)
-      --      if not srv then srv=net.createServer(net.TCP,30) end
       srv:listen(80,function(socket)
          socket:on("receive", receiver )
          socket:on("sent", function(sck) sck:close() sck=nil end)
       end )
-      print("HTTP server running on port 80")
-      --      smartmeter.init()
-   end
+      print("HTTP server running on port 80") end
 
-   --local function setData(data)
-   --end
-   --
-   --local function setBody(body)
-   --end
    init()
-   --   M.init=init
    --M.create=create
    --M.body=body1
-   M.srv=srv
+   --   M.srv=srv
    --M.setBody=setBody
    --M.setData=setData
    -- usage: M.init()
