@@ -6,7 +6,7 @@ jetzt={} -- globale zeittabelle anlegen
 -- jetzt.minute int
 -- jetzt.unix   unix time in sekunden
 do
-   print "lade zeit"
+   print "load zeit"
    local M={}   
 
    local function dateTable(sec) -- unix-Zeit in Tabelle umwandeln
