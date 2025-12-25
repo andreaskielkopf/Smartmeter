@@ -2,11 +2,11 @@ meter={}
 --data={}
 do
    local M={}
-   print "lade data"
+   print "load data"
    local util=require 'util'
    local zeit=require 'zeit' -- aber es dauert einige Zeit bis today aktuell ist !!!
-   local hour=require 'hour'
-   local day =require 'day'
+--   local hour=require 'hour'
+--   local day =require 'day'
 
    
 
@@ -94,10 +94,10 @@ do
    --   testB()
    --   util.print3d(erg)
    M.init=init
-   M.getHour=getHour    -- get Hour from Storage
-   M.getHours=getHours
-   M.getDay=getDay      -- get Day from Storage
-   M.toLines=toLines -- convert Day to lines{} for html
+--   M.getHour=getHour    -- get Hour from Storage
+--   M.getHours=getHours
+--   M.getDay=getDay      -- get Day from Storage
+--   M.toLines=toLines -- convert Day to lines{} for html
    M.toLine2=toLine2 -- convert Stunde to Line
    --   M.testC=testC
 
