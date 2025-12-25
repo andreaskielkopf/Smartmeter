@@ -27,60 +27,57 @@ do
             end end
          dofile(filename) end -- datei interpretieren
       --      print (erg,type(erg[1]),type(erg[2]))
-      return erg or {stunde,{}}
-   end
+      return erg or {stunde,{}} end
 
    -- Tabelle {Stunde, {0 bis zu 60 x(Takte je Minute)}}
-   local function hourToLine(h) -- Aufruf mit einer StundenTabelle
+   local function hourToTable(h) -- Aufruf mit einer StundenTabelle
       local stunde=h[1] or 0
       local takte=h[2] or {}
---      print ('HourToLine:',h,type(stunde),type(takte))
+      --      print ('HourToLine:',h,type(stunde),type(takte))
       local buf={}
       for i=60,1,-1 do -- 60 Minuten rückwärts zuweisen in den buffer
          if takte[i] and takte[i]>0 then
             table.insert(buf,1,takte[i]) -- alles andere nach rechts schieben
       elseif #buf>0 then
-         table.insert(buf,1,"0")
+         table.insert(buf,1,'0')
       end end
-      local line=table.concat({"hour{", stunde, ",{", table.concat(buf,','), "}}"})
-      return line
+      return stunde, table.concat(buf,',') end -- liefert die stunde und die ticks
+
+   -- Tabelle {Stunde, {0 bis zu 60 x(Takte je Minute)}}
+   local function hourToLua(h) -- Aufruf mit einer StundenTabelle
+      --      local stunde=h[1] or 0
+      --      local takte=h[2] or {}
+      --      --      print ('HourToLine:',h,type(stunde),type(takte))
+      --      local buf={}
+      --      for i=60,1,-1 do -- 60 Minuten rückwärts zuweisen in den buffer
+      --         if takte[i] and takte[i]>0 then
+      --            table.insert(buf,1,takte[i]) -- alles andere nach rechts schieben
+      --      elseif #buf>0 then
+      --         table.insert(buf,1,'0')
+      --      end end
+      --      local line=table.concat({"hour{", stunde, ",{", table.concat(buf,','), "}}"})
+      --      return line
+      local stunde, ticks= hourToTable(h)
+      return table.concat({'hour{', stunde, ',{', ticks, '}}'})
    end
 
-   --   local function getHours(tag)
-   --      tag=tag or jetzt.heute or '2025-12-01'
-   --      local filename= util.fName(tag)
-   --      local stunden={}
-   --      --      print ("getHours",filename or tag)
-   --      if filename then
-   --         function date(d) end -- noop
-   --         function hour(h)
-   --            if not erg and type(h)=='table' and #h==2 and
-   --               type(h[1])~='table' then
-   --               --               print('a=',h[1])
-   --               if type(h[2])=='table' then
-   --                  --                  print('b=',h[2])
-   --                  stunden[h[1]+1]=h[1]
-   --               end end end
-   --         dofile(filename) end
-   --      date=nil
-   --      hour=nil
-   --      local erg={}
-   --      erg[1]=tag
-   --      erg[2]=stunden
-   --      return erg
-   --   end
+   -- Tabelle {Stunde, {0 bis zu 60 x(Takte je Minute)}}
+   local function hourToJson(h) -- Aufruf mit einer StundenTabelle
+      local stunde, ticks= hourToTable(h)
+      return table.concat({'{"hour":', stunde, ', "ticks":[', ticks, ']}'})
+   end
 
    local function test()
       local erg=getHour('2025-12-01',4)
---      print (erg,type(erg[1]),type(erg[2]))
-      local b=hourToLine(erg)
-      print ('test hour:', b)
+      --      print (erg,type(erg[1]),type(erg[2]))
+      print ('test hour Lua:', hourToLua(erg))
+      print ('test hour Json:', hourToJson(erg))
    end
-   
+
    M.test=test
    M.get=getHour        -- Datensatz für eine Stunde
-   --   M.getAll=getHours    -- alle Stundensätze dieses Tages
-   M.toLine=hourToLine  -- diese Stunde Serialisieren
+   M.toLua=hourToLua      -- diese Stunde Serialisieren
+   M.toJson=hourToJson
    print "end hour"
    return M
 end
