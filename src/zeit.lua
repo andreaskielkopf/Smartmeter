@@ -7,7 +7,7 @@ jetzt={} -- globale zeittabelle anlegen
 -- jetzt.unix   unix time in sekunden
 do
    print "load zeit"
-   local M={}   
+   local M={}
 
    local function dateTable(sec) -- unix-Zeit in Tabelle umwandeln
       sec=sec or rtctime.get()-- if not sec then sec, usec, rate=rtctime.get() end
@@ -21,9 +21,12 @@ do
       local stunde = d.hour
       local minute = d.min
       if minute ~= jetzt.minute then
+         if smart then
+            smart.next(heute,stunde,minute) -- Minute weiterschalten (neue Werte)
+         end
          --         local t={'heute ist ',heute,"(",stunde,":",minute,')'}
          --         print(table.concat(t))
-         print(table.concat({'heute ist ',heute,"(",stunde,":",minute,')'}))
+         --         print(table.concat({'heute ist ',heute,"(",stunde,":",minute,')'}))
       end
       return { unix=d.unix, heute=heute, stunde=stunde, minute=minute } end
 
