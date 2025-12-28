@@ -1,9 +1,7 @@
 -- Auswahl der verschiedenen Funktionen die bereits programmiert wurden
 do
-   require '_init' -- bind das LFS ein
-   connect=require 'connect' -- Wifi-Verbindung herstellen
-   --   connect.init() ist bereits includiert
-   --   if not connect then return end -- abbruch
+   node.flashindex("_init")()   
+   connect=require 'connect' -- Wifi-Verbindung herstellen      
    if connect.gotIP() then -- Das ist zwar aufwändig, spart aber Heap !!!
       print 'unload connect'
       connect=nil -- connect trennen
@@ -14,11 +12,24 @@ do
    -- erlaubt es aber nach dem Verbindungsaufbau die Methoden für connect wieder zu entladen
    -- Das entlastet den Heap erheblich
    local function main()      
-      zeit=require 'zeit' -- init() included      
-      server=require 'server' -- server aufsetzen init() included
-      --      if util then util.print3d(jetzt) end
+      zeit=require 'zeit' -- init() included
+      server=require 'server' -- server aufsetzen init() included      
+      print 'load telnet'
+      telnet=require 'telnet' -- global telnet anlegen 
+      print 'end telnet'
+      if telnet then
+         telnet:open(nil,nil,2323)
+         print 'started telnet'
+      end
+      print 'load ftpserver'
+      FTP=require 'ftpserver'
+      print 'end ftpserver'-- global FTP anlegen
+      if FTP then
+         FTP:createServer('smart','meter')
+         print 'started FTP'
+      end
+      smart=require 'smartmeter' -- globaler Zugriff auf smart !!!
       print "Hallo Albershausen"
-      smart=require 'smartmeter' -- globaler Zugriff auf smart !!!      
    end
    print ('starte main',connect)
    -- wenn connect noch geladen ist, warte 30 Sekunden bis die Verbindung steht
