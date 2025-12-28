@@ -1,7 +1,7 @@
 -- wifi initialisiren, so dass ein server gestartet werden kann
 do
+   print 'load connect'
    local M={}
-
    local function gotIP() -- ist eine Verbindung da, und eine IP auch
       return wifi.sta.status() == wifi.STA_GOTIP end
 
@@ -38,7 +38,9 @@ do
       if not printStatus() then
          eus=eusRead() -- Verbindungsdaten laden
          if eus then
+            print 'config wifi'
             wifi.sta.config(eus)-- verbinden
+            wifi.setmode(wifi.STATION)
             return printStatus()-- tailcall
          end end
    return false end
@@ -74,6 +76,7 @@ do
    -- runLater(function() print "Hallo Albershausen" end, 15)
    -- runLater(main)
    -- if gotIP() then main() else runLater(main, 20) end
+   print 'end connect'
    return M
 end
 
