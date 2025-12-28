@@ -13,7 +13,9 @@ do
    local M={}
    local hour_=require 'hour'
    local day_=require 'day'
+--   local ring=require 'ring'
    local stunde
+   local nr
 
    --   local function test()
    --      print ''
@@ -28,13 +30,16 @@ do
       stunde = hour_.get(tag_,stunde_)
       --      print (hour_.toLua(stunde))
       --      test()
+      require 'blinker' -- lade den IRQ für den sensor
+      --      if ring and ring.init then ring.init() end
    end
 
    local function nextMin(tag_neu,stunde_neu,minute_neu)
       if jetzt and jetzt.heute then
          if not stunde then init(tag_neu,stunde_neu) end
          local tag_alt,stunde_alt,minute_alt = jetzt.heute,jetzt.stunde,jetzt.minute
-         print(table.concat({'jetzt ist ',tag_neu,"(",stunde_neu,":",minute_neu,')'}))
+         --         print(table.concat({'jetzt ist ',tag_neu,"(",stunde_neu,":",minute_neu,')'}))
+         --         print('>',stunde,stunde_alt,stunde_neu,tag_alt)
          if stunde_alt~=stunde_neu then -- stunde speichern
             hour_.append(tag_alt,stunde)
             if tag_alt~=tag_neu then -- tag anpassen
@@ -42,6 +47,19 @@ do
                day_.compile(tag_alt)
             end
             stunde= hour_.get(tag_neu,stunde_neu) -- neue stunde vorbereiten
+         end
+         nr=minute_neu+1
+      end end
+
+   local function irPuls(count)
+      --      print ('irPuls',stunde,nr)
+      if stunde and type(stunde[2])=='table' then
+         local t=stunde[2]
+         local i=nr
+         if i then
+            if t[i] then t[i]=t[i]+count
+            else         t[i]=count  end
+            --            print('sum=',i,stunde[2],#stunde[2],t,t[i])
          end end end
 
    local function data(datum)
@@ -49,16 +67,38 @@ do
          local tmp={}
          for c in datum:gmatch("[0-9]+") do tmp[#tmp+1]=c end
          if #tmp==3 then
-            datum=table.concat(tmp,'-')
-            --            print (datum)
+            datum=table.concat(tmp,'-') -- print (datum)
             return table.concat(day_.toJson(day_.get(datum)),'\n')
-         end end
+         else
+            if stunde then
+               --               print ("datum",datum)
+               if datum=='/store' then
+                  --                  print 'datum==/store'
+                  if jetzt then
+                     --                     print 'jetzt ok'
+                     if jetzt.heute then
+                        --                        print 'jetzt.heute OK'
+                        local j=jetzt.heute
+                        local t=stunde[2]
+--                        print('append',j,stunde[1],t,#t)
+--                        print('toLua',hour_.toLua(stunde))
+--                        print('toJson',hour_.toJson(stunde))
+                        hour_.append(j,stunde)
+                     end
+                  end
+               end
+               -- print ("data stunde",stunde,#stunde,hour_.toLua(stunde))
+               return hour_.toJson(stunde)
+            end
+         end
+      end
       return table.concat({datum,'   ???   '},'\n') end
 
    M.data=data
    M.init=init
    M.next=nextMin
    M.stunde=stunde
-   print "end smartmeter"
+   M.irPuls=irPuls
+   print "end smartmeter" -- jetzt
    return M
 end

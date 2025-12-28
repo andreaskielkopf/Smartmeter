@@ -2,11 +2,13 @@
 do
    print "load server"
    local M={}
---   local data=require 'data'
+   --   local data=require 'data'
    local sm=require 'smartmeter'
+   --   local ring=require 'ring'
    local sm_    ='/smartmeter'
    local sm_heap=table.concat({sm_,"/heap"})
    local sm_data=table.concat({sm_,"/data"})
+   --   local sm_ring=table.concat({sm_,"/ring"})
    --local icon  ='/favicon'
    --   local body1 =table.concat({'{\"', sm, '":"heap","2025-12-01",3,4,5,6,7,8,9,10}'})
    local usage =table.concat({"<html><body><h1>NodeMCU</h1><p>Use ", sm_, "</p></body></html>"})
@@ -18,12 +20,15 @@ do
 
    local function fetch(pfad)
       if pfad then
-         if pfad:find(sm_heap) then return
-            table.concat({'{"Heap":', node.heap(), '}'}) end -- tailcall
-         if pfad:find(sm_data) then return
-            table.concat({'{"Data":', sm.data(pfad:match("/data(.*)")) ,'}'},'\n') end -- tailcall ???
-            if pfad:find(sm_) then return
-               table.concat({'{"', sm_, '/{heap, data/2025/12/01}'}) end -- tailcall
+         if pfad:find(sm_heap) then
+            return table.concat({'{"Heap":', node.heap(), '}'})  -- tailcall
+         elseif sm and sm.data and pfad:find(sm_data) then
+            return table.concat({'{"Data":', sm.data(pfad:match("/data(.*)")) ,'}'},'\n')  -- tailcall
+               --         elseif ring and ring.get and pfad:find(sm_ring) then
+               --            return table.concat({'{"Ring":', ring.get(pfad:match("/ring(.*)")) ,'}'},'\n')  -- tailcall ???
+         elseif pfad:find(sm_) then
+            return table.concat({'{"', sm_, '/{heap, data, data/store, data/2025/12/01, ring}'})  -- tailcall
+         end
       end
       return usage end
 
