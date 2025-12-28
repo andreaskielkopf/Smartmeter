@@ -54,10 +54,12 @@ do
       local stunde, ticks= hourToTable(h)
       return table.concat({'{"hour":', stunde, ', "ticks":[', ticks, ']}'})
    end
-
+   -- speichert in das angegebene datum diesen stundendatensatz
    local function hourAppend(datum,stunde)
       local lua=table.concat({datum,'.lua'})
+--      print('appends',lua)
       if stunde and file.exists(lua) then
+--         print ('exists',hourToLua(stunde))
          --         print (datum,hourToLua(stunde))
          local f=file.open(lua,"a")
          f:write(hourToLua(stunde))
@@ -82,5 +84,3 @@ do
    print "end hour"
    return M
 end
-
-
