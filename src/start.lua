@@ -1,7 +1,8 @@
 -- Auswahl der verschiedenen Funktionen die bereits programmiert wurden
 do
-   node.flashindex("_init")()   
-   connect=require 'connect' -- Wifi-Verbindung herstellen      
+   node.flashindex("_init")()
+   require 'updateLFS'
+   connect=require 'connect' -- Wifi-Verbindung herstellen
    if connect.gotIP() then -- Das ist zwar aufwändig, spart aber Heap !!!
       print 'unload connect'
       connect=nil -- connect trennen
@@ -11,16 +12,16 @@ do
    -- Eine extra funktion für main zu verwenden ist aufwändige,
    -- erlaubt es aber nach dem Verbindungsaufbau die Methoden für connect wieder zu entladen
    -- Das entlastet den Heap erheblich
-   local function main()      
+   local function main()
       zeit=require 'zeit' -- init() included
-      server=require 'server' -- server aufsetzen init() included      
-      print 'load telnet'
-      telnet=require 'telnet' -- global telnet anlegen 
-      print 'end telnet'
-      if telnet then
-         telnet:open(nil,nil,2323)
-         print 'started telnet'
-      end
+      server=require 'server' -- server aufsetzen init() included
+      --      print 'load telnet'
+      --      telnet=require 'telnet' -- global telnet anlegen
+      --      print 'end telnet'
+      --      if telnet then
+      --         telnet:open(nil,nil,2323)
+      --         print 'started telnet'
+      --      end
       print 'load ftpserver'
       FTP=require 'ftpserver'
       print 'end ftpserver'-- global FTP anlegen
