@@ -2,6 +2,7 @@
 do
    print 'load connect'
    local M={}
+   local util_=require 'util'
    local function gotIP() -- ist eine Verbindung da, und eine IP auch
       return wifi.sta.status() == wifi.STA_GOTIP end
 
@@ -20,8 +21,8 @@ do
 
    local eus=nil
    local function eusRead() -- lade die Verbindungsdaten aus dem Dateisystem
-      local eus_file='eus_params.lua'
-      if file.exists(eus_file) then
+      local eus_file=util_.fName( 'eus_params')
+      if eus_file then
          if not eus then
             print ('read file ' , eus_file)
             eus=dofile(eus_file) -- Callbacks definieren
