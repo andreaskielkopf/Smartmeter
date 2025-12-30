@@ -3,7 +3,11 @@ do
    print 'load blinker'
    --   local ring=require 'ring'
    local function init()
-      local pinIR,pinNext,pinLED,flanke = 7,6,4,"down"
+      local pinGND,pinIR,pinLED,flanke = 2,3,4,"down" -- pinIR:1,2,3,5,6,7 pinGND:0,1,2,3,5,6,7 pinLED:4 
+      if pinGND then -- Optionaler Pin neben pinIR, der GND bereitstellt
+         gpio.mode(pinGND,gpio.OPENDRAIN) -- extern geschaltte Masse
+         gpio.write(pinGND, 0) -- auf Masse schalten
+      end
       --      local last=0 -- last holds last us
       if file.exists('flanke_up.flag') then flanke='up' end
       if file.exists('flanke_both.flag') then flanke='both' end
@@ -13,9 +17,6 @@ do
       -- use pinIR D7 as the input for pulses
       gpio.mode(pinIR,gpio.INT,gpio.PULLUP) -- internen pullup 20-50 kOhm
       --      gpio.mode(pinIR,gpio.INT,gpio.FLOAT) -- extern pullup 20kOhm
-      gpio.mode(pinNext,gpio.OPENDRAIN) -- extern geschaltte Masse
-      gpio.write(pinNext, 0) -- auf Masse schalten
-
       local function fnIRpuls(level, when, cnt)
          gpio.write(pinLED, 0) -- show LED
          if smart and smart.irPuls then
