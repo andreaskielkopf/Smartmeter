@@ -13,6 +13,7 @@ do
    local M={}
    local hour_=require 'hour'
    local day_=require 'day'
+   local util_=require 'util'
    --   local ring=require 'ring'
    local stunde
    local nr
@@ -23,6 +24,7 @@ do
    --      day_.test()
    --   end
 
+   -- Datensatz für heute vorbereiten und stunde laden, dann IRQ aktivieren
    local function init(tag_,stunde_)
       print ("smartmeter init", tag_,stunde_)
       local tag = day_.create(tag_)
@@ -34,74 +36,72 @@ do
       --      if ring and ring.init then ring.init() end
    end
 
+   -- Nach jeder Minute den Zeiger für den IRQ weitersetzen
    local function nextMin(tag_neu,stunde_neu,minute_neu)
       if jetzt and jetzt.heute then
          if not stunde then init(tag_neu,stunde_neu) end
          local tag_alt,stunde_alt,minute_alt = jetzt.heute,jetzt.stunde,jetzt.minute
-         print(table.concat({'jetzt ist ',tag_neu,"(",stunde_neu,":",minute_neu,')'}))
-         print ('min:', node.heap())
+         --         print(table.concat({'jetzt ist ',tag_neu,"(",stunde_neu,":",minute_neu,')'}))
+         --         print ('min:', node.heap())
          --         print('>',stunde,stunde_alt,stunde_neu,tag_alt)
          if stunde_alt~=stunde_neu then -- stunde speichern
             hour_.append(tag_alt,stunde)
             jetzt.stunde=stunde_neu
             if tag_alt~=tag_neu then -- tag anpassen
-               day_.create(tag_neu)
---               day_.compile(tag_alt)
+               day_.create(tag_neu) -- day_.compile(tag_alt)
                jetzt.heute=tag_neu
             end
             stunde= hour_.get(tag_neu,stunde_neu) -- neue stunde vorbereiten
          end
-         nr=minute_neu+1
+         nr=minute_neu+1 -- pointer für den IRQ anpassen
+         if tag_alt~=tag_neu then util_.clean() end -- cleanup am ende des tages
       end end
 
-   local function irPuls(count)
-      --      print ('irPuls',stunde,nr)
+   -- Die Daten vom IRQ entgegennehmen und in die aktuelle stunde eintragen
+   local function irPuls(count) -- print ('irPuls',stunde,nr)
       if stunde and type(stunde[2])=='table' then
-         local t=stunde[2]
-         local i=nr
+         local t,i=stunde[2],nr -- nr ist der globale Zeiger auf die aktuelle minute
          if i then
-            if t[i] then t[i]=t[i]+count
-            else         t[i]=count  end
+            if t[i] then t[i]=t[i]+count -- increment
+            else         t[i]=count  end -- anlegen
             --            print('sum=',i,stunde[2],#stunde[2],t,t[i])
          end end end
 
-   local function data(datum)
-      if type(datum)=='string' then -- 2025-12-01
-         local tmp={}
-         for c in datum:gmatch("[0-9]+") do tmp[#tmp+1]=c end
-         if #tmp==3 then
-            datum=table.concat(tmp,'-') -- print (datum)
-            return table.concat(day_.toJson(day_.get(datum)),'\n')
-         else
-            if stunde then
-               --               print ("datum",datum)
-               if datum=='/store' then
-                  --                  print 'datum==/store'
-                  if jetzt then
-                     --                     print 'jetzt ok'
-                     if jetzt.heute then
-                        --                        print 'jetzt.heute OK'
-                        local j=jetzt.heute
-                        local t=stunde[2]
-                        --                        print('append',j,stunde[1],t,#t)
-                        --                        print('toLua',hour_.toLua(stunde))
-                        --                        print('toJson',hour_.toJson(stunde))
---                        hour_.append(j,stunde)
-                     end
-                  end
-               end
-               -- print ("data stunde",stunde,#stunde,hour_.toLua(stunde))
-               return hour_.toJson(stunde)
-            end
-         end
-      end
-      return table.concat({datum,'   ???   '},'\n') end
+   -- Angefragte Daten an den Webservber liefern
+   local function data(anfrage) -- anfrage ist der angefragte text
+      if type(anfrage)=='string' then -- 2025/12/01/xx
+         local tmp={} -- tag=nil
+         for c in anfrage:gmatch("[0-9]+") do tmp[#tmp+1]=c end
+         local x
+         if #tmp>0 then
+            x=table.concat(tmp,'-',1, #tmp>3 and 3 or #tmp)
+         end-- print (datum)
+         if #tmp==1 or #tmp==2 then -- anfrage 2025 Liste der Monate im Dateisystem für dieses Jahr
+            -- "2025"={01,02,03,05,06,07,12}
+            -- "2025-04"={12,17,22,23,24,30,31}
+            return table.concat({'{"filter":"',x,'", "found":[',table.concat(util_.welche(tmp),','),']}'})
+         elseif #tmp==3 then -- anfrage 2025/12/01 Der ganzze tag
+            return table.concat({'{"date":"',x,'", "hours":[',table.concat(day_.stunden(x),','),']}'})
+         elseif #tmp==4 then -- anfrage 2025/12/01/xx nach einer bestimmten Stunde
+            local uhr=tmp[4] + 0 -- in number umwandeln
+            if type(uhr)=='number' then
+               local h= hour_.get(x,uhr)
+               if h then return hour_.toJson(h)
+               else      return 'nicht gefunden'
+               end end
+         elseif #tmp==0 then do
+            if stunde then -- sonst immer die aktuelle Stunde              --               print ("datum",datum)
+               return hour_.toBase64(stunde)
+            else
+               return 'Es sind noch keine Daten vorhanden'
+            end end end end
+   return table.concat({anfrage,'   ???   '},'\n') end
 
    M.data=data
    M.init=init
    M.next=nextMin
    M.stunde=stunde
    M.irPuls=irPuls
-   print "end smartmeter" -- jetzt
+   print "end smartmeter"
    return M
 end
