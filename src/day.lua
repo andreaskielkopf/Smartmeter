@@ -11,26 +11,24 @@ do
    -- Beispiel{'2025-12-01',{}}
    local function getDay(datum) -- aufruf mit dem gewünschten datum
       datum=datum or jetzt.heute or '2025-12-01'
-      local filename=util_.fName(datum)
-      local stunden={} -- Tabelle mit den Stunden ist erstmal leer
-      local erg={datum,stunden}
-      --      print (filename or datum)
-      if filename then -- die datei gibt es
-         function date(d) -- date interpretieren
-            if #d >= 1 then erg[1]=d[1] end end
-         function hour(h) -- hour interpretieren
-            if #h == 2 and type(h[2])=='table' then
-               local uhr=h[1] -- uhrzeit
-               local takte={} -- array
-               --               local stunde={uhr,takte}
-               for k,v in pairs(h[2]) do
-                  if v>0 then takte[k]=v end
+      local stunden,filename= {},util_.fName(datum)
+      local erg={datum,stunden} -- Tabelle mit den Stunden ist erstmal leer
+      for _,line in util_.nextLine(filename) do
+         local h=util_.getObj('hour',line) line=nil
+         if h then
+            if type(h)=='table' and #h==2 and type(h[2])=='table' then
+               local uhr,takte=h[1],{} -- uhrzeit,array
+               for k,v in ipairs(h[2]) do -- Reihenfolge beibehalten
+                  if v>0 then takte[k]=v end -- Nullen entfernen
                end
-               stunden[uhr]={uhr,takte} -- ganze stunde zuweisen
-               --               print('uhr',type(stunde),#stunden)
-         end end
-         dofile(filename) -- print ("done",filename)
-      end return erg end
+               if #takte>0 then
+                  stunden[uhr]={uhr,takte} -- print (stunden[uhr][1],#stunden[uhr][2])
+               end end h=nil
+         else
+            local d=util_.getObj('date',line) line=nil
+            if d and type(d)=='table' and d[1] then
+               erg[1]=d[1] end d=nil
+         end end return erg end
 
    -- Tabelle {Tag, {Stunde1, Stunde2, Stunde3 ...}
    -- wird zu:
@@ -38,10 +36,10 @@ do
    local function dayToLua(day) -- consumer = verbraucht die daten und liefert ein array mit textzeilen
       local lines={}
       if day and day[1] then
-         --         print('day:', day[1])
+         print('day:', day[1])
          lines[1]=table.concat({"date{'",day[1],"'}"})
          local stunden=day[2]
-         --         print('stunden',type(stunden),#stunden,#day)
+         print('stunden',type(stunden),#stunden,#day)
          if type(stunden)=='table' and #stunden>0 then
             for i=0,24 do
                if stunden[i] then
@@ -49,36 +47,56 @@ do
                end end end end
       return lines end
 
-   local function dayToJson(day) -- consumer = verbraucht die daten und liefert ein array mit textzeilen
+   local function dayToBase64(day) -- consumer = verbraucht die daten und liefert ein array mit textzeilen
+      local lines={}
       if day and day[1] then
-         --         print('day:', day[1])
-         local lines={table.concat({'{"date":"',day[1],'",'}),'"hours":['}
+         lines[1]=table.concat({"date{'",day[1],"'}"})
          local stunden=day[2]
-         --         print('stunden',type(stunden),#stunden,#day)
          if type(stunden)=='table' and #stunden>0 then
             for i=0,24 do
                if stunden[i] then
-                  local line= hour_.toJson(stunden[i])
+                  lines[#lines+1]=hour_.toBase64(stunden[i])
+               end end end end
+      return lines end
+
+   local function dayToJson(day) -- consumer = verbraucht die daten und liefert ein array mit textzeilen
+      if day and day[1] then
+         --        util_.print3d(datum)
+         collectgarbage("collect")
+         print('day:', day[1] )
+         local lines={table.concat({'{"date":"',day[1],'",'}),'"hours":['}
+         local stunden=day[2]
+         print('stunden',type(stunden),#stunden,#day)
+         if type(stunden)=='table' and #stunden>0 then
+            for i=0,24 do
+               local s=stunden[i] stunden[i]=nil
+               if s then
+                  print('s:',i,s,s[1],node.heap())
+                  local line= hour_.toJson(s)
+                  --                  print (line)
                   if #lines==2 then lines[#lines+1]=line
                   else lines[#lines+1]=table.concat({',',line})
-                  end end end end
+                  end line=nil
+               end end end
          lines[#lines+1]=']}'
+         print 'end toJson'
          return lines end
    return {} end
 
    local function dayCreate(datum) -- erzeugt die datei für den aktuellen Tag
       if not util_.fName(datum) and datum and #datum==10 then -- nur wenn es ein heute gibt
          -- print ('create day Lua:',datum,'\n', table.concat(dayToLua(getDay(datum)),'\n'))
-         local f=file.open(table.concat({datum,'.lua'}),"a")
-         f:write(table.concat(dayToLua(getDay(datum)),'\n'))
-         f:write('\n')
-         f:close()
-         f=nil end
+         local fd=file.open(table.concat({datum,'.lua'}),"a")
+         for _,line in ipairs(dayToLua(getDay(datum))) do fd:writeline(line) end
+         fd:close() fd=nil end
    return getDay(datum) end  --vorhandene Datei übergeben
 
-   --   local function dayCompile(datum)
-   --      print 'dayCompile not implemented jet'
-   --   end
+   local function dayStunden(tag)
+      local l={}
+      for k,_ in pairs(getDay(tag)[2]) do -- evenzuell verschobene Reihenfolge
+         l[#l+1]=k
+      end table.sort(l)
+      return l end
 
    --   local function test()
    --      local erg=getDay('2025-12-01') -- Tabelle {Tag, {Stunde1, Stunde2, Stunde3 ...}
@@ -95,6 +113,8 @@ do
    --   M.compile=dayCompile
    M.toLua=dayToLua  -- diesen Tag Serialisieren
    M.toJson=dayToJson
+   M.toBase64=dayToBase64
+   M.stunden=dayStunden
    print 'end day'
    return M
 end
