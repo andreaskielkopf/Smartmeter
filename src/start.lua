@@ -1,14 +1,14 @@
 -- Auswahl der verschiedenen Funktionen die bereits programmiert wurden
 do
    node.flashindex("_init")()
-   require 'updateLFS'
+   update=require 'updateLFS' -- globale funktion update
    connect=require 'connect' -- Wifi-Verbindung herstellen
    if connect.gotIP() then -- Das ist zwar aufwändig, spart aber Heap !!!
       print 'unload connect'
       connect=nil -- connect trennen
       package.loaded.connect=nil -- connect unload spart 3k auf dem Heap
    end
-
+   require 'util' -- und mach einen cleanUp
    -- Eine extra funktion für main zu verwenden ist aufwändige,
    -- erlaubt es aber nach dem Verbindungsaufbau die Methoden für connect wieder zu entladen
    -- Das entlastet den Heap erheblich
@@ -32,7 +32,6 @@ do
       smart=require 'smartmeter' -- globaler Zugriff auf smart !!!
       print "Hallo Albershausen"
    end
-   print ('starte main',connect)
-   -- wenn connect noch geladen ist, warte 30 Sekunden bis die Verbindung steht
+   print ('starte main',connect) -- wenn connect noch geladen ist, warte 30 Sekunden bis die Verbindung steht
    if connect then connect.runLater(main,30) else main() end -- sonst sofort starten
 end
