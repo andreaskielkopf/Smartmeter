@@ -4,7 +4,7 @@ do
       print 'update ???'
       local update_flag='update.flag'
       local remove_flag='remove.flag'
-      local lfs_img='smartmeter.img'
+      local lfs_img='smartmeter.img'      
       if file.exists(lfs_img) then
          print (table.concat({lfs_img,' exists'}))
          if file.exists(update_flag) then
@@ -28,4 +28,5 @@ do
    end
    update()
    print 'end updateLFS'
+   return update
 end
