@@ -55,3 +55,20 @@ do
 	return M
 end
 ```
+
+## Die selbst compilierte firmware flashen:
+esptool -v -c esp8266 -p /dev/ttyUSB0 write-flash -fm dout 0x0 0x00000.bin 0x10000 0x10000.bin 
+
+Partitionstabelle ist:
+* pos: 0x000000	size: 0x007A60 =>  31kByte firmware
+* pos: 0x010000	size: 0x06A000 => 424kByte firmware
+* pos: 0x07a000	size: 0x010000 =>  64kByte	für LFS (readonly)
+* pos: 0x08a000	size: 0x073000 => 460kByte	für SPIFFS (beschreibbar)
+
+Vorteil LFS:		Lua-Code kann aus dem FFS direkt ausgeführt werden, was eine Menge Heap spart
+Vorteil SPIFFS		Daten können im SPIFFS gespeichert werden, und sind dann per FTP zugänglich
+
+Die gewünschte größe des LFS kann in user_config.h angepasst werden
+Die größe des SPIFFS wird automatisch größer, wenn weniger module einkompiliert werden. Das kann in user_modules.h konfiguriert werden ;-)
+
+@todo unnötige module entfernen
