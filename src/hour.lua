@@ -12,22 +12,14 @@ do
       tag=tag or jetzt.heute or '2025-12-01'
       stunde=stunde or jetzt.stunde or 15 -- default 14:00 Uhr bis 14:59
       local filename= util_.fName(tag)
-      local erg
-      --      print ("getHour:",filename or tag,stunde)
-      if filename then
-         function date(d) end -- noop
-         function hour(h)
-            --            print (type(h), #h, type(h[1]),type(h[2]))
-            if not erg --shortcut
-               and type(h)=='table' and #h==2 -- table mit 2 einträgen
-               and type(h[1])~='table' and h[1]==stunde -- stunde stimmt überein
-               and type(h[2])=='table' then -- tabelle mit den minuten
-               --               print (h[1],#h[2])
-               erg=h
-            end end
-         dofile(filename) end -- datei interpretieren
-      --      print (erg,type(erg[1]),type(erg[2]))
-      return erg or {stunde,{}} end
+      local gefunden
+      for _,line in util_.nextLine(filename) do
+         local hour=util_.getObj('hour',line)
+         if hour and hour[1] and hour[1]==stunde then
+            --            return hour -- liefere die erste gefundene Zeile
+            gefunden= hour -- liefere die letzte gefundene Zeile
+         end end -- datei interpretieren
+      return gefunden or {stunde,{}} end
 
    -- Tabelle {Stunde, {0 bis zu 60 x(Takte je Minute)}}
    local function hourToTable(h) -- Aufruf mit einer StundenTabelle
@@ -39,33 +31,36 @@ do
          if takte[i] and takte[i]>0 then
             table.insert(buf,1,takte[i]) -- alles andere nach rechts schieben
       elseif #buf>0 then
-         table.insert(buf,1,'0')
+         table.insert(buf,1,0)
       end end
-      return stunde, table.concat(buf,',') end -- liefert die stunde und die ticks
+      return stunde, buf end -- liefert die stunde und die ticks(als tabelle)
 
    -- Tabelle {Stunde, {0 bis zu 60 x(Takte je Minute)}}
    local function hourToLua(h) -- Aufruf mit einer StundenTabelle
       local stunde, ticks= hourToTable(h)
-      return table.concat({'hour{', stunde, ',{', ticks, '}}'})
+      return table.concat({'hour{', stunde, ',{', table.concat(ticks,','), '}}'})
    end
 
    -- Tabelle {Stunde, {0 bis zu 60 x(Takte je Minute)}}
    local function hourToJson(h) -- Aufruf mit einer StundenTabelle
       local stunde, ticks= hourToTable(h)
-      return table.concat({'{"hour":', stunde, ', "ticks":[', ticks, ']}'})
+      return table.concat({'{"hour":', stunde, ', "ticks":[', table.concat(ticks,','), ']}'})
    end
+
+   -- Tabelle in Base64 codieren
+   local function hourToBase64(h) -- Aufruf mit einer StundenTabelle
+      local stunde, ticks= hourToTable(h)
+      ticks=util_.tBase64(ticks)
+      return table.concat({'{"hour":', stunde, ', "ticks":[', table.concat(ticks), ']}'})
+   end
+
    -- speichert in das angegebene datum diesen stundendatensatz
    local function hourAppend(datum,stunde)
       local lua=table.concat({datum,'.lua'})
---      print('appends',lua)
       if stunde and file.exists(lua) then
---         print ('exists',hourToLua(stunde))
-         --         print (datum,hourToLua(stunde))
-         local f=file.open(lua,"a")
-         f:write(hourToLua(stunde))
-         f:write('\n')
-         f:close()
-         f=nil end end
+         local fd=file.open(lua,"a")
+         fd:writeline(hourToLua(stunde))
+         fd:close() fd=nil end end
 
    --   local function test()
    --      local erg=getHour('2025-12-01',4)
@@ -77,10 +72,12 @@ do
    --   end
 
    --   M.test=test
+
    M.get=getHour        -- Datensatz für eine Stunde
    M.append=hourAppend
    M.toLua=hourToLua      -- diese Stunde Serialisieren
    M.toJson=hourToJson
+   M.toBase64=hourToBase64
    print "end hour"
    return M
 end
