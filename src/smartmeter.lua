@@ -91,7 +91,7 @@ do
                end end
          elseif #tmp==0 then do
             if stunde then -- sonst immer die aktuelle Stunde              --               print ("datum",datum)
-               return hour_.toBase64(stunde)
+               return hour_.toJson(stunde)
             else
                return 'Es sind noch keine Daten vorhanden'
             end end end end

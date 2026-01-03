@@ -48,11 +48,11 @@ do
    end
 
    -- Tabelle in Base64 codieren
-   local function hourToBase64(h) -- Aufruf mit einer StundenTabelle
-      local stunde, ticks= hourToTable(h)
-      ticks=util_.tBase64(ticks)
-      return table.concat({'{"hour":', stunde, ', "ticks":[', table.concat(ticks), ']}'})
-   end
+--   local function hourToBase64(h) -- Aufruf mit einer StundenTabelle
+--      local stunde, ticks= hourToTable(h)
+--      ticks=util_.tBase64(ticks)
+--      return table.concat({'{"hour":', stunde, ', "ticks":[', table.concat(ticks), ']}'})
+--   end
 
    -- speichert in das angegebene datum diesen stundendatensatz
    local function hourAppend(datum,stunde)
@@ -77,7 +77,7 @@ do
    M.append=hourAppend
    M.toLua=hourToLua      -- diese Stunde Serialisieren
    M.toJson=hourToJson
-   M.toBase64=hourToBase64
+--   M.toBase64=hourToBase64
    print "end hour"
    return M
 end

@@ -89,24 +89,24 @@ do
          end end end -- datei interpretieren
 
    -- wandle eine kleine zahl in bas64 um
-   local b64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+--   local b64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
    --   local b88 = b64 .. '!#$%&()*-,.:;=@[]^_`{|}~' -- local b91 = b88 .. '<>\\'
-   local function base64(n) -- wert umwandeln
-      if type(n)=='number' then
-         do
-            if n<0 then return '~~' -- Fehler
-            elseif n==0 then return '  ' -- Leer ;-)
-            elseif n>4095 then return '##' -- Überlauf
-            else local a,b=math.floor(n/64) +1,n % 64 +1
-               return table.concat({b64:sub(a,a),b64:sub(b,b)}) end
-         end
-   elseif n==nil then return ' _' end  -- nil
-   print(type(n),n) return '??' end -- Fehler
+--   local function base64(n) -- wert umwandeln
+--      if type(n)=='number' then
+--         do
+--            if n<0 then return '~~' -- Fehler
+--            elseif n==0 then return '  ' -- Leer ;-)
+--            elseif n>4095 then return '##' -- Überlauf
+--            else local a,b=math.floor(n/64) +1,n % 64 +1
+--               return table.concat({b64:sub(a,a),b64:sub(b,b)}) end
+--         end
+--   elseif n==nil then return ' _' end  -- nil
+--   print(type(n),n) return '??' end -- Fehler
 
-   local function tBase64(t) -- tabelle mit werten umwandeln
-      local erg={}
-      for k,v in ipairs(t) do erg[k]=base64(v) end
-      return erg end
+--   local function tBase64(t) -- tabelle mit werten umwandeln
+--      local erg={}
+--      for k,v in ipairs(t) do erg[k]=base64(v) end
+--      return erg end
 
    -- Lösche solange Dateien im SPIFFS bis genug Platz frei ist
    local function cleanUp(soll)
@@ -140,8 +140,8 @@ do
    cleanUp()
 
    M.fName=fName
-   M.base64=base64
-   M.tBase64=tBase64
+--   M.base64=base64
+--   M.tBase64=tBase64
    M.nextLine=nextLine
    M.getObject=getObject
    M.getObj=getObj
