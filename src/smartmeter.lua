@@ -16,7 +16,10 @@ do
    -- Datensatz für heute vorbereiten und stunde laden, dann IRQ aktivieren
    local function init(tag_, stunde_)
       print ("smartmeter init", tag_, stunde_)
-      local tag, stunde= day_.create(tag_), hour_.get(tag_, stunde_)      
+      local tag = day_.create(tag_)
+      --      print (table.concat(day_.toLua(tag),'\n'))
+      stunde = hour_.get(tag_,stunde_)
+      --      print (hour_.toLua(stunde))
       --      test()
       require 'blinker' -- lade den IRQ für den sensor und starte damit den IRQ
       --      if ring and ring.init then ring.init() end
