@@ -1,0 +1,10 @@
+-- those wifi_* are the base parameters that are saved anyway
+-- if network is open, then there is no wifi_password
+local p = {}
+p.ssid="WLAN-SSID"
+p.pwd="WLAN-Passwort"
+p.auto=true
+p.save=true
+-- your own parameters:
+p.name='Smartmeter'
+return p
