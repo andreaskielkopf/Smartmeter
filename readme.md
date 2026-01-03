@@ -1,17 +1,17 @@
-# smartmeter
+# Smartmeter
 
-## Stromverbrauch von einem Smartmeter mit IR-Schnittstelle fortlaufend aufzeichnen
-Viele Smartmeter haben eine IR-Schnittstelle, über die je Abrechnungseinheit ein IR-Impuls gesendet wird.
-Wenn man die Pulse pro Minute mitzählt, erhält man ein direktes Maß für den Stromverbrauch in dieser Zeit.
+## WLAN-Messgerät um die IR-Pulse eines Smartmeters mitzuschreiben
+Viele Smartmeter haben eine IR-Schnittstelle, über die je Abrechnungseinheit ein IR-Impuls ausgestrahlt wird. Wenn man die Pulse pro Minute mitzählt, erhält man ein direktes Maß für den Stromverbrauch in dieser Zeit.
 
-Ein `D1-mini` mit einem `ESP8266` reicht für diesen Zweck völlig aus. Der Stromverbrauch dafür liegt bei ca. 50mA.
-Man braucht noch einen `IR-Transistor` als Empfänger und ein kurzes Kabel von D6 und D7 das bis zum Smartmeter reicht.
-Ein USB-Netztei und ein kurzes USB-Kabel bis zum D1-mini und zusätzlich eine Drahtbrücke oder einen 1kOhm Widerstand für D5
+* Ein `D1-mini` mit einem `ESP8266` reicht für diesen Zweck völlig aus. Der Stromverbrauch dafür liegt bei ca. 50mA.
+* Man braucht noch einen `IR-Transistor` als Empfänger und ein kurzes Kabel von D6 und D7 das bis zum Smartmeter reicht.
+* Ein USB-Netztei und ein kurzes USB-Kabel bis zum D1-mini und zusätzlich eine Drahtbrücke oder einen 1kOhm Widerstand für D5
 
-Der ESP8266 hat genug Speicher für die Daten von 2-3 Monaten (je nach Verbaruch). Damit müssen die Daten nicht täglich abgerufen werden.
-Der Abruf kann bequem über WLAN im lokalen Netz durchgeführt werden. Dazu muss jedoch `SSID` und `Passwort` eingetragen werden.
-Keine Cloud. Die Daten verlassen das lokale Netzwerk nicht. Es werden keinerlei personenbezogenen Daten gespeichert.
+Der ESP8266 hat genug Speicher für die Daten von 1-2 Monaten (je nach Verbrauch). Damit müssen die Daten nicht täglich abgerufen werden. Der Abruf kann bequem über WLAN im lokalen Netz durchgeführt werden. Dazu muss jedoch `SSID` und `Passwort` eingetragen werden.
+
+**Keine Cloud**. Die Daten verlassen das lokale Netzwerk nicht. Es werden keinerlei personenbezogenen Daten gespeichert.
 Kalkulation:
+
     * 2.50 € wemos D1-mini ESP-8266 (NICHT ESP-32 !!!) mit Buchsenleiste und micro-USB
     * 0.10 € Fototransistor (Receiver hat nur 2 Pins, weil die Basis IR-Licht empfängt)
     * 0.10 € 1kOhm Widerstand oder kurze Drahtbrücke
@@ -29,14 +29,13 @@ Verwendet wird in diesem Fall Lua.
 ## Hardware
 Mögliche Hardware: D1-mini, NodeMCU, ...(mit ESP-8266)
 
-### anpassen
+### IR-Empfang
 Um die IR-Signale zu erfassen wird ein IR-Receiver benötigt. Dazu reicht ein einfacher Fototransistor.(Z.B. SFH3100F)
 Der hat 2 pins !!! und wird an die Anschlüsse D6 und D7 angeschlossen 
 (Im weiteren Verlauf wird dann noch ein 1kOhm Widerstand von Masse(G) zu D1 gebraucht.)
 
 ## Grundfirmware mit esptool flashen
-NodeMcu oder D1-mini per USB- an den PC anschließen. Achtung das muss ein USB-Kabel sein, das auch Datenleitungen enthält. 
-Manche reinen Ladekabel eignen sich nicht.
+NodeMcu oder D1-mini per USB- an den PC anschließen. Achtung das muss ein USB-Kabel sein, das auch Datenleitungen enthält. Manche reinen Ladekabel eignen sich nicht. Die vorbereitet firmware liegt im Ordner /bin
 
 ### Verbindung testen:
 ```
