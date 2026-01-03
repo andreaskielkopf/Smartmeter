@@ -84,3 +84,32 @@ Die größe des SPIFFS wird automatisch größer, wenn weniger module einkompili
 -- DHT
 -- SPI UCG ST7735 ???
 
+### Besonderheiten in `user_config.h`
+| Nr| Text |Kommentar|
+|----------|----------|---|
+| 10|#define FLASH_AUTOSIZE| |
+| 21|#define BIT_RATE_DEFAULT BIT_RATE_115200| Baudrate = 115 kBaud |
+| 53|#define LUA_NUMBER_INTEGRAL| Integer-Build |
+| 82|#define LUA_FLASH_STORE 0x10000| 64 kByte reservieren für LFS|
+|154|#define NET_PING_ENABLE| Ping über Netzwerk wird beantwortet |
+|186|#define WIFI_STA_HOSTNAME "Smartmeter"||
+|187|#define WIFI_STA_HOSTNAME_APPEND_MAC||
+|194|#define ENDUSER_SETUP_AP_SSID "Smartmeter"||
+### Besonderheiten in `user_modules.h`
+| Nr| Text |Kommentar|
+|----------|----------|---|
+|28|#define LUA_USE_MODULES_ENDUSER_SETUP|Enduser-setup per wlan AP (hab ich noch nicht zum Laufen bekommen) |
+|29|#define LUA_USE_MODULES_FILE|SPIFFS brauchen wir|
+|31|#define LUA_USE_MODULES_GPIO|Für den IR-Empfänger|
+|40|#define LUA_USE_MODULES|MDNS ??? (aus)|
+|42|#define LUA_USE_MODULES_NET|Netzwerk brauchen wir|
+|43|#define LUA_USE_MODULES_NODE|wegen LFS und Updatefunktion auf jeden Fall|
+|55|#define LUA_USE_MODULES_RCTTIME|Um die Zeit auf dem laufenden zu halten|
+|59|#define LUA_USE_MODULES_SNTP|SNTP um die Zeit mit dem Netzwerk abzugleichen|
+|68|#define LUA_USE_MODULES_TMR|Für den Timer IRQ|
+|70|#define LUA_USE_MODULES_UART|Für die Kommunikation mit dem ESP-Tool ??? |
+|75|#define LUA_USE_MODULES_WIFI|WLAN brauchen wir auch ;-)|
+
+
+export USER_PROLOG="Smartmeter © 2025 Andreas Kielkopf";make
+

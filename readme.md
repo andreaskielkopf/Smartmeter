@@ -2,10 +2,14 @@
 
 ## WLAN-Modul um die IR-Pulse eines Smartmeters aufzuzeichnen
 Viele Smartmeter haben eine IR-Schnittstelle, über die je Abrechnungseinheit ein IR-Impuls ausgestrahlt wird. Wenn man die Pulse pro Minute mitzählt, erhält man ein direktes Maß für den Stromverbrauch in dieser Zeit.
+![](img/bild1.png)
 
 * Ein `D1-mini` mit einem `ESP8266` reicht für diesen Zweck völlig aus. Der Stromverbrauch dafür liegt bei ca. 60mA@5V (0.3 Watt) für nodeMCU.
-* Man braucht noch einen `IR-Transistor` als Empfänger und ein kurzes Kabel von `D2`nd `D3` das bis zum Smartmeter reicht.
-* Ein USB-Netztei und ein kurzes USB-Kabel bis zum D1-mini/NodeMCU und zusätzlich eine Drahtbrücke oder einen 1kOhm Widerstand für `D1`
+* Man braucht noch einen `IR-Transistor` als Empfänger und ein kurzes Kabel von `D2` und `D3` das bis zum Smartmeter reicht.
+
+![](img/bild2.png)
+
+* Ein USB-Netztei und ein kurzes USB-Kabel bis zum D1-mini/NodeMCU und zusätzlich eine Drahtbrücke(grün) oder einen 1kOhm Widerstand für `D1`
 
 Der ESP8266 hat genug Speicher für minütliche Daten von 1-2 Monaten (je nach Verbrauch). Damit müssen die Daten nicht täglich abgerufen werden. Der Abruf kann bequem über WLAN im lokalen Netz durchgeführt werden. Dazu muss jedoch `SSID` und `Passwort` eingetragen werden.
 
@@ -103,7 +107,7 @@ ESPlorer -> [rechte Bildschirmhälfte] -> [Knopf mit blauem Kreis]
 ```
 ESPlorer -> [rechte Bildschirmhälfte] -> [Dropdown]
 ```
-* Verbinden
+* Verbinden (mit 115200 Baud)
 ```
 ESPlorer -> [rechte Bildschirmhälfte] -> [Großer Knopf "Open"]
 ```
@@ -116,7 +120,7 @@ ESPlorer -> [rechte Bildschirmhälfte] -> [Knopf RTS]
 
 * Upload erste Datei ins `SPIFFS`
 ```
-ESPlorer -> [linke Bildschirmhälfte] -> [NodeMCU & MicroPython] -> [Scripts] -> [Upload] "smartmeter.img"
+ESPlorer -> [linke Bildschirmhälfte] -> [NodeMCU & MicroPython] -> [Scripts] -> [Upload ...] "smartmeter.img"
 ```
 
 * Nun das selbe mit den anderen Dateien ... 
@@ -132,18 +136,23 @@ Um `smartmeter.img` als `LFS` zu installieren muss im ESPlorer Terminal noch der
 ```
 ESPlorer -> [rechte Bildschirmhälfte] -> [untere Hälfte] -> [helles Eingabefeldt]
 ```
-Den Inhalt des Eingabefelds durch `node.LFS.reload('smartmeter.img')` ersetzen, und `[return]` drücken.
+Den Inhalt des Eingabefelds durch 
+```
+node.LFS.reload('smartmeter.img')
+```
+ ersetzen, und `[return]` drücken.
 Danach sollte der ESP-8266 einige Zeilen ausgeben, und dann automatisch neu starten.
 
 https://nodemcu.readthedocs.io/en/release/modules/node/#nodelfsreload
 
 ### Autostart
 Nachdem die Hardware eingerichtet und die Software aufgespielt ist, kann das Projekt in Betrieb genommen werden.
-Damit die Software automatisch startet ist eine Drahtbrücke oder besser ein `1kOhm Widerstand` zwischen Masse(`G`) und `D1` notwendig
+Damit die Software automatisch startet ist eine Drahtbrücke oder besser ein `1kOhm Widerstand` zwischen Masse(`G`) und `D1` notwendig.
 Wenn ein Fehler bei der Entwicklung passiert, kann durch entfernen der Brücke zu `D1` der Autostart (Bootschleife) unterbrochen werden
 
 ## Tests
-Jetzt am D1-Mini die Resettaste kurz drücken um das Programm zu starten
+Jetzt am D1-Mini die Resettaste kurz drücken um das Programm zu starten.
+Es kann sein, dass beim Allerersten Boot die Verbindung zum WLAN nicht innerhalb 30 Sekunden klappt. Einfach nochmal 30 Sekunden warten, und dann nochmal Reset drücken. (Später gehts dann innerhalb von 2-3 Sekunden)
 
 ### HTTP server
 Beim starten des ESP-8266 an ESPlorer, zeigt er die IP an, die er bekommen hat. Es ist gut sich diese zu notieren ;-)
@@ -176,12 +185,14 @@ ergibt
 ```
 
 ### IR-Empfang
-Jeder Impuls des Smartmeters, der vom IR-Transistor empfangen wird, wird durch Aufblinken der blauen LED an D4 quittiert.
-Das kann man leicht mit einer beliebigen IR-Fernbedienung prüfen. Wenn das nicht oder schlecht klappt:
+**Achtung !** Der IR-Empfang ist in den ersten ca. 60 Sekunden **aus**geschaltet. Danach blinkt die blaue LED genau 1x. Dann ist der IR-empfang scharfgeschaltet.
+
+Jeder Impuls des Smartmeters, der vom IR-Transistor empfangen wird, wird durch Aufblinken der blauen LED an D4 quittiert. Das kann man leicht mit einer beliebigen IR-Fernbedienung prüfen. Wenn das nicht oder schlecht klappt:
 * Wackelkontakt der Leitung zum IR-Empfänger -> nachprüfen
-* IR-Empfänger an D2,D3 verpolt -> IR-Empfänger umstecken
+* IR-Empfänger an D2,D3 verpolt angeschlossen -> IR-Empfänger umstecken
+* Mit der Fernbedienung auf die Rückseite des Sensors gezielt (Der Empfang geht vorne wo die Linse ist deutlich besser)
 * Umgebungslicht zu hell -> etwas abdunkeln
-Der Empfang sollte zumindest bis zu ca. 5cm funktionieren
+Der Empfang sollte zumindest bis zu ca. 5cm entfernt von der Fernbedienung funktionieren.
 
 ### Abfrage der aktuell gemessenen Daten
 `curl http://192.168.178.45/smartmeter/data`
@@ -191,7 +202,20 @@ ergibt z.B.
 {"hour":8, "ticks":[106,107,116,118,118,16]}
 }
 ```
-Das sind die gezählten Impulse der IR-Fernbedienung (während 6 Minuten)
+oder
+```
+{"Data":
+{"hour":18, "ticks":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52]}
+}
+```
+Das sind die gezählten Impulse der IR-Fernbedienung
+
+# Installieren
+Das Smartmeter im Zählerschrank hat oben in der Mitte eine kleine durchsichtige LED
+![](img/bild3.png) 
+über die kann der IR-Empfänger mit einem Klebeband geklebt werden. 
+Links davon steht IR. rechts davon steht bei mir dran, dass 10.000 IR-Pulse pro kWh gesendet werden. 
+Sobald das Modul eingesteckt ist, sollte nach 60 Sekunden die blaue LED zu blinken beginnen.
 
 # ToDo´s
 
