@@ -1,50 +1,51 @@
 do
    print "load hour"
-   local M={}
-   local util_=require 'util'
-   local zeit_=require 'zeit' -- aber es dauert einige Zeit bis today aktuell ist !!!
+   local M= {}
+   local util_= require 'util'
+   local zeit_= require 'zeit' -- aber es dauert einige Zeit bis today aktuell ist !!!
 
    -- liefert den Datensatz für die angegebene Stunde aus den vorhandenen Dateien
    -- oder einen leeren Datensatz für diese Stunde als Liste (einfach durchnummeriert)
    -- Tabelle {Stunde, {0 bis zu 60 x(Takte je Minute)}}
    -- Beispiel: {23,{}} oder {7,{0,99}} oder {0,{99,25,72,5,0,0,12,0,0}}
-   local function getHour(tag,stunde) -- aufruf mit dem gewünschten datum
-      tag=tag or jetzt.heute or '2025-12-01'
-      stunde=stunde or jetzt.stunde or 15 -- default 14:00 Uhr bis 14:59
+   local function getHour(tag, stunde) -- aufruf mit dem gewünschten datum
+      tag= tag or jetzt.heute or '2025-12-01'
+      stunde= stunde or jetzt.stunde or 15 -- default 14:00 Uhr bis 14:59
       local filename= util_.fName(tag)
       local gefunden
-      for _,line in util_.nextLine(filename) do
-         local hour=util_.getObj('hour',line)
+      for _, line in util_.nextLine(filename) do
+         local hour= util_.getObj('hour', line)
          if hour and hour[1] and hour[1]==stunde then
             --            return hour -- liefere die erste gefundene Zeile
             gefunden= hour -- liefere die letzte gefundene Zeile
          end end -- datei interpretieren
-      return gefunden or {stunde,{}} end
+      return gefunden or {stunde, {}} end
 
    -- Tabelle {Stunde, {0 bis zu 60 x(Takte je Minute)}}
+   -- wird nur lokal genutzt
    local function hourToTable(h) -- Aufruf mit einer StundenTabelle
-      local stunde=h[1] or 0
-      local takte=h[2] or {}
+      local stunde= h[1] or 0
+      local takte= h[2] or {}
       --      print ('HourToLine:',h,type(stunde),type(takte))
-      local buf={}
-      for i=60,1,-1 do -- 60 Minuten rückwärts zuweisen in den buffer
+      local buf= {}
+      for i= 60, 1, -1 do -- 60 Minuten rückwärts zuweisen in den buffer
          if takte[i] and takte[i]>0 then
-            table.insert(buf,1,takte[i]) -- alles andere nach rechts schieben
+            table.insert(buf, 1, takte[i]) -- alles andere nach rechts schieben
       elseif #buf>0 then
-         table.insert(buf,1,0)
+         table.insert(buf, 1, 0)
       end end
       return stunde, buf end -- liefert die stunde und die ticks(als tabelle)
 
    -- Tabelle {Stunde, {0 bis zu 60 x(Takte je Minute)}}
    local function hourToLua(h) -- Aufruf mit einer StundenTabelle
       local stunde, ticks= hourToTable(h)
-      return table.concat({'hour{', stunde, ',{', table.concat(ticks,','), '}}'})
+      return table.concat({'hour{', stunde, ',{', table.concat(ticks, ','), '}}'})
    end
 
    -- Tabelle {Stunde, {0 bis zu 60 x(Takte je Minute)}}
    local function hourToJson(h) -- Aufruf mit einer StundenTabelle
       local stunde, ticks= hourToTable(h)
-      return table.concat({'{"hour":', stunde, ', "ticks":[', table.concat(ticks,','), ']}'})
+      return table.concat({'{"hour":', stunde, ', "ticks":[', table.concat(ticks, ','), ']}'})
    end
 
    -- Tabelle in Base64 codieren
@@ -55,12 +56,12 @@ do
 --   end
 
    -- speichert in das angegebene datum diesen stundendatensatz
-   local function hourAppend(datum,stunde)
-      local lua=table.concat({datum,'.lua'})
+   local function hourAppend(datum, stunde)
+      local lua= table.concat({datum, '.lua'})
       if stunde and file.exists(lua) then
-         local fd=file.open(lua,"a")
+         local fd= file.open(lua, "a")
          fd:writeline(hourToLua(stunde))
-         fd:close() fd=nil end end
+         fd:close() fd= nil end end
 
    --   local function test()
    --      local erg=getHour('2025-12-01',4)
@@ -73,11 +74,11 @@ do
 
    --   M.test=test
 
-   M.get=getHour        -- Datensatz für eine Stunde
-   M.append=hourAppend
-   M.toLua=hourToLua      -- diese Stunde Serialisieren
-   M.toJson=hourToJson
 --   M.toBase64=hourToBase64
+   M.get= getHour        -- Datensatz für eine Stunde
+   M.append= hourAppend
+   M.toLua= hourToLua      -- diese Stunde Serialisieren
+   M.toJson= hourToJson
    print "end hour"
    return M
 end
