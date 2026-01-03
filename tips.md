@@ -72,3 +72,15 @@ Die gewünschte größe des LFS kann in user_config.h angepasst werden
 Die größe des SPIFFS wird automatisch größer, wenn weniger module einkompiliert werden. Das kann in user_modules.h konfiguriert werden ;-)
 
 @todo unnötige module entfernen
+
+-- folgende module werden benötigt:
+-- node, net, wifi, end user setup
+-- file, GPIO, UART
+-- timer, RTC time, SNTP
+-- LFS mit 64kByte
+
+-- Optional: BME280, BME280.math
+-- DS18B20.lua, 1-Wire
+-- DHT
+-- SPI UCG ST7735 ???
+

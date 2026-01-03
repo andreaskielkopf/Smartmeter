@@ -1,16 +1,17 @@
 # Smartmeter
 
-## WLAN-Messgerät um die IR-Pulse eines Smartmeters mitzuschreiben
+## WLAN-Modul um die IR-Pulse eines Smartmeters aufzuzeichnen
 Viele Smartmeter haben eine IR-Schnittstelle, über die je Abrechnungseinheit ein IR-Impuls ausgestrahlt wird. Wenn man die Pulse pro Minute mitzählt, erhält man ein direktes Maß für den Stromverbrauch in dieser Zeit.
 
-* Ein `D1-mini` mit einem `ESP8266` reicht für diesen Zweck völlig aus. Der Stromverbrauch dafür liegt bei ca. 50mA.
-* Man braucht noch einen `IR-Transistor` als Empfänger und ein kurzes Kabel von D6 und D7 das bis zum Smartmeter reicht.
-* Ein USB-Netztei und ein kurzes USB-Kabel bis zum D1-mini und zusätzlich eine Drahtbrücke oder einen 1kOhm Widerstand für D5
+* Ein `D1-mini` mit einem `ESP8266` reicht für diesen Zweck völlig aus. Der Stromverbrauch dafür liegt bei ca. 60mA@5V (0.3 Watt) für nodeMCU.
+* Man braucht noch einen `IR-Transistor` als Empfänger und ein kurzes Kabel von `D2`nd `D3` das bis zum Smartmeter reicht.
+* Ein USB-Netztei und ein kurzes USB-Kabel bis zum D1-mini/NodeMCU und zusätzlich eine Drahtbrücke oder einen 1kOhm Widerstand für `D1`
 
-Der ESP8266 hat genug Speicher für die Daten von 1-2 Monaten (je nach Verbrauch). Damit müssen die Daten nicht täglich abgerufen werden. Der Abruf kann bequem über WLAN im lokalen Netz durchgeführt werden. Dazu muss jedoch `SSID` und `Passwort` eingetragen werden.
+Der ESP8266 hat genug Speicher für minütliche Daten von 1-2 Monaten (je nach Verbrauch). Damit müssen die Daten nicht täglich abgerufen werden. Der Abruf kann bequem über WLAN im lokalen Netz durchgeführt werden. Dazu muss jedoch `SSID` und `Passwort` eingetragen werden.
 
 **Keine Cloud**. Die Daten verlassen das lokale Netzwerk nicht. Es werden keinerlei personenbezogenen Daten gespeichert.
-Kalkulation:
+
+#### Kalkulation:
 
     * 2.50 € wemos D1-mini ESP-8266 (NICHT ESP-32 !!!) mit Buchsenleiste und micro-USB
     * 0.10 € Fototransistor (Receiver hat nur 2 Pins, weil die Basis IR-Licht empfängt)
@@ -30,12 +31,11 @@ Verwendet wird in diesem Fall Lua.
 Mögliche Hardware: D1-mini, NodeMCU, ...(mit ESP-8266)
 
 ### IR-Empfang
-Um die IR-Signale zu erfassen wird ein IR-Receiver benötigt. Dazu reicht ein einfacher Fototransistor.(Z.B. SFH3100F)
-Der hat 2 pins !!! und wird an die Anschlüsse D6 und D7 angeschlossen 
-(Im weiteren Verlauf wird dann noch ein 1kOhm Widerstand von Masse(G) zu D1 gebraucht.)
+Um die IR-Signale zu erfassen wird ein IR-Receiver benötigt. Dazu reicht ein einfacher Fototransistor.(Z.B. `SFH3100F`) Der hat 2 pins !!! und wird an die Anschlüsse `D2` und `D3` angeschlossen .Die Pins für den IR-Transistor können in `blinker.lua` geändert werden.
+(Im weiteren Verlauf wird dann noch ein 1kOhm Widerstand von Masse(G) zu D1 gebraucht.) 
 
 ## Grundfirmware mit esptool flashen
-NodeMcu oder D1-mini per USB- an den PC anschließen. Achtung das muss ein USB-Kabel sein, das auch Datenleitungen enthält. Manche reinen Ladekabel eignen sich nicht. Die vorbereitet firmware liegt im Ordner /bin
+NodeMcu oder D1-mini per USB- an den PC anschließen. Achtung das muss ein USB-Kabel sein, das auch Datenleitungen enthält. Manche reinen Ladekabel eignen sich nicht. Die vorbereitete Firmware liegt im Ordner /bin. Du kannst sie aber auch selbst compilieren
 
 ### Verbindung testen:
 ```
@@ -56,11 +56,11 @@ Die Software enthält:
 * `smartmeter`
   Das eigentliche Programm zum Erfassen der IR-Impulse
 * `telnet` auf port 2323
-  Zum fernsteuern z.B. mit `putty` oder einem anderen telnet-Client
+  Zum fernsteuern z.B. mit `putty` oder einem anderen telnet-Client (momentan deaktiviert)
 * `ftp-server` (Zugang mit user=smart und passwort=meter)
   Zum direkten Zugang zu den Dateien (Lua-Programme und Messwerte) z.B. mit `mc` oder einem anderen ftp-Client
 * `http-server` 
-  Um die Messdaten programmatisch abfragen zu können z.B. mit `curl`
+  Um die Messdaten programmatisch abfragen zu können z.B. mit `curl` oder SmartmeterGui
 
 Damit das alles nicht zu viel RAM(`Heap`) braucht, muss der Großteil davon im LFS gespeichert sein. 
 Nur die Startdatei `init.lua` muss unbedingt im normalen Dateisystem(`SPIFFS`) liegen
@@ -69,31 +69,30 @@ Nur die Startdatei `init.lua` muss unbedingt im normalen Dateisystem(`SPIFFS`) l
  * https://nodemcu.readthedocs.io/en/release/upload/
 
 #### eus_params.lua
-Es gibt verschieden Wege den ESP-8266 an ihr WLAN anzupassen. Aber irgendwie muss er ja SSID und Passwort bekommen. 
-Sonst ist er später nicht im WLAN erreichbar.
+Es gibt verschieden Wege den ESP-8266 an ihr WLAN anzupassen. Aber irgendwie muss er ja SSID und Passwort bekommen. Sonst ist er später nicht im WLAN erreichbar.
 
 Eine Möglichkeit ist es die Datei `eus_params.lua` an ihr WLAN anzupassen.
 * SSID eintragen
 * Passwort eintragen
+* Datei umbenennen von `eus_params.lu` nach `eus_params.lua`
 
 #### init.lua
-Das ist die Startdatei die nach dem Einstecken der Betriebsspannung gestartet wird. Diese muss im `SPIFFS` installiert werden. 
+Das ist die Startdatei die nach dem Einstecken der Betriebsspannung gestartet wird. Diese muss im `SPIFFS` installiert bleiben. 
 Sie prüft, ob die Verbindung bei D1 besteht.
 * mit D1 auf Masse, startet der Smartmeter (durch `start.lua`)
 * mit D1 offen hält der Boot an (Um mit dem ESPlorer Dateien aufspielen zu können)
+* Der Pin D1 kann in `init.lua` geändert werden
 
 #### smartmeter.img
 Alle LUA-Quelltexte für das Projekt sind bereits in die Datei `smartmeter.img` compiliert. Diese Datei muß unbedingt im `LFS` installiert werden.
-Zwar können einzelne Dateien auch im `SPIFFS` auf dem ESP-8266 gespeichert werden, und diese haben dann Vorrang, 
-aber das braucht eine Menge RAM(Heap) zur Laufzeit. Der FTP-server zum Beispiel funktioniert deswegen nur aus dem `LFS`.
+
+Zwar können einzelne Dateien auch im `SPIFFS` auf dem ESP-8266 gespeichert werden, und diese haben dann Vorrang, aber das braucht eine Menge RAM(Heap) zur Laufzeit. Der FTP-server zum Beispiel funktioniert deswegen nur aus dem `LFS`.
 
 #### start.lua
-Das ist das eigentliche Programm. Es wird nur dann gestartet, wenn `init.lua` die Brücke bei D1 findet. 
-(`start.lua` und `init.lua` sind auch im LFS enthalten, aber `init.lua` kann nicht von dort starten)
+Das ist das eigentliche Programm. Es wird nur dann gestartet, wenn `init.lua` die Brücke bei D1 findet. (`start.lua` und `init.lua` sind auch im LFS enthalten, aber `init.lua` kann nicht von dort starten)
 
 #### mit ESPlorer uploaden
-Alle diese Dateien (`smartmeter.img`, `eus_params.lua`, `start.lua` und zuletzt `init.lua` müssen per [Upload] ins 
-Dateisystem(`SPIFFS`) auf den ESP8266 übertragen werden.
+Alle diese Dateien (`smartmeter.img`, `eus_params.lua`, `start.lua` und zuletzt `init.lua` müssen per [Upload] ins Dateisystem(`SPIFFS`) auf den ESP8266 übertragen werden.
 (Bitte dazu erst mal die Brücke an D1 entfernen)
 
 * Ports refreshen
@@ -112,7 +111,7 @@ ESPlorer -> [rechte Bildschirmhälfte] -> [Großer Knopf "Open"]
 ```
 ESPlorer -> [rechte Bildschirmhälfte] -> [Knopf RTS]
 ```
-  Einschalten, kurz warten, ausschalten.
+  `[RTS]` einschalten, kurz warten, ausschalten.
   Spätestens jetzt sollten die ESP-Startmeldungen im Fenster erscheinen.
 
 * Upload erste Datei ins `SPIFFS`
@@ -148,44 +147,41 @@ Jetzt am D1-Mini die Resettaste kurz drücken um das Programm zu starten
 
 ### HTTP server
 Beim starten des ESP-8266 an ESPlorer, zeigt er die IP an, die er bekommen hat. Es ist gut sich diese zu notieren ;-)
+
 Bei mir war das `192.168.178.45`
 
 #### Abfrage des Heap
+Z.B mit linux `curl`:
 `curl http://192.168.178.45/smartmeter/heap`
 ergibt z.B.
 ```
 {"Heap":30280}
 ```
+oder mit einem Browser:
+`http://192.168.178.45/smartmeter/heap`
+ergibt:
+```
+{"Heap":34056}
+```
 Der freie Heap sollte so ca. 30kByte groß sein
 
+
 #### Abfrage der Musterdaten aus `2025-12-01.lua` im `LFS`
-`curl http://192.168.178.45/smartmeter/data/2025/12/01`
+`curl http://192.168.178.45/smartmeter/data/2025`
 ergibt
 ```
 {"Data":
-{"date":"2025-12-01",
-"hours":[
-{"hour":0, "ticks":[1,1,2,0,4,5,6,7,8,9,10,11,12,13,14,15,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]}
-,{"hour":1, "ticks":[1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]}
-,{"hour":2, "ticks":[1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]}
-,{"hour":3, "ticks":[1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]}
-,{"hour":4, "ticks":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]}
-,{"hour":5, "ticks":[]}
-,{"hour":6, "ticks":[]}
-,{"hour":7, "ticks":[1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]}
-,{"hour":15, "ticks":[1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]}
-,{"hour":23, "ticks":[1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]}
-,{"hour":24, "ticks":[1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]}
-]}
+{"filter":"2025", "found":[12]}
 }
 ```
 
 ### IR-Empfang
-Jeder Impuls des Smartmeters, der vom IR-Transistor empfangen wird, wird durch Aufblinken der blkauen LED an D4 quittiert.
+Jeder Impuls des Smartmeters, der vom IR-Transistor empfangen wird, wird durch Aufblinken der blauen LED an D4 quittiert.
 Das kann man leicht mit einer beliebigen IR-Fernbedienung prüfen. Wenn das nicht oder schlecht klappt:
 * Wackelkontakt der Leitung zum IR-Empfänger -> nachprüfen
-* IR-Empfänger an D6,D7 verpolt -> IR-Empfänger umstecken
-* Umgebungslicht -> etwas abdunkeln
+* IR-Empfänger an D2,D3 verpolt -> IR-Empfänger umstecken
+* Umgebungslicht zu hell -> etwas abdunkeln
+Der Empfang sollte zumindest bis zu ca. 5cm funktionieren
 
 ### Abfrage der aktuell gemessenen Daten
 `curl http://192.168.178.45/smartmeter/data`
@@ -195,9 +191,15 @@ ergibt z.B.
 {"hour":8, "ticks":[106,107,116,118,118,16]}
 }
 ```
+Das sind die gezählten Impulse der IR-Fernbedienung (während 6 Minuten)
 
 # ToDo´s
 
+* Eine elegante Update-Funktion der Software über lokales FTP
 * Die Abfrage eines Tages liefer keine Daten, wenn die erste Stunde fehlt
 * Liste der vorhandene Dateien mit Messwerten
 * Löschen alter Dateien bei Platzmangel (max 80% im `SPIFFS` belegt ?)
+* Zusätzliches Projekt um die Daten auszulesen und in einer GUI darzustellen (SmartmeterGui)
+
+* Erweiterung auf Temperaturmessung und Feuchtemessung (wenn die entsprechenden Module angeschlossen sind)
+* Deaktivierung des IR-Empfangs, wenn keine Impulse kommen (einfrieren)
