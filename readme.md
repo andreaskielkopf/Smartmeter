@@ -37,10 +37,10 @@ Mögliche Hardware: D1-mini, NodeMCU, ...(mit ESP-8266)
 
 ### IR-Empfang
 Um die IR-Signale zu erfassen wird ein IR-Receiver benötigt. Dazu reicht ein einfacher Fototransistor.(Z.B. `SFH3100F`) Der hat 2 pins !!! und wird an die Anschlüsse `D2` und `D3` angeschlossen .Die Pins für den IR-Transistor können in `blinker.lua` geändert werden.
-(Im weiteren Verlauf wird dann noch ein 1kOhm Widerstand von Masse(G) zu D1 gebraucht.) 
+(Im weiteren Verlauf wird dann noch ein 1kOhm Widerstand von Masse(`G`) zu `D1` gebraucht.) 
 
 ## Grundfirmware mit esptool flashen
-NodeMcu oder D1-mini per USB- an den PC anschließen. Achtung das muss ein USB-Kabel sein, das auch Datenleitungen enthält. Manche reinen Ladekabel eignen sich nicht. Die vorbereitete Firmware liegt im Ordner /bin. Du kannst sie aber auch selbst compilieren
+NodeMcu oder D1-mini per USB- an den PC anschließen. Achtung das muss ein USB-Kabel sein, das auch Datenleitungen enthält. Manche Ladekabel eignen sich nicht. Die Firmware liegt im Ordner /bin. Du kannst sie aber auch selbst compilieren.
 
 ### Verbindung testen:
 ```
@@ -49,7 +49,7 @@ esptool -v -c esp8266 -p /dev/ttyUSB0 read-mac
 Wenn das geht, ist das Kabel OK.
 
 ### Firmware installieren:
-Die Dateien [0x00000.bin](https://github.com/andreaskielkopf/smartmeter/raw/master/bin/0x00000.bin) und [0x10000.bin](https://github.com/andreaskielkopf/smartmeter/raw/master/bin/0x10000.bin) enthalten die von mir vorbereitete Firmware.
+Die Dateien [0x00000.bin](https://github.com/andreaskielkopf/smartmeter/raw/master/bin/0x00000.bin) und [0x10000.bin](https://github.com/andreaskielkopf/smartmeter/raw/master/bin/0x10000.bin) enthalten die Firmware.
 
 ```
 esptool -v -c esp8266 -p /dev/ttyUSB0 erase-flash
@@ -83,18 +83,18 @@ Eine Möglichkeit ist es die Datei `eus_params.lua` an ihr WLAN anzupassen.
 
 #### [init.lua](https://github.com/andreaskielkopf/smartmeter/raw/master/src/init.lua)
 Das ist die Startdatei die nach dem Einstecken der Betriebsspannung gestartet wird. Diese muss im `SPIFFS` installiert bleiben. 
-Sie prüft, ob die Verbindung bei D1 besteht.
-* mit D1 auf Masse, startet der Smartmeter (durch `start.lua`)
-* mit D1 offen hält der Boot an (Um mit dem ESPlorer Dateien aufspielen zu können)
-* Der Pin D1 kann in `init.lua` geändert werden
+Sie prüft, ob die Verbindung bei `D1` besteht.
+* mit `D1` auf Masse(`G`), startet der Smartmeter (durch `start.lua`)
+* mit `D1` offen hält der Boot an (Um mit dem ESPlorer Dateien aufspielen zu können)
+* Der Pin `D1` kann in `init.lua` geändert werden
 
 #### [smartmeter.img](https://github.com/andreaskielkopf/smartmeter/raw/master/src/smartmeter.img)
-Alle LUA-Quelltexte für das Projekt sind bereits in die Datei `smartmeter.img` compiliert. Diese Datei muß unbedingt im `LFS` installiert werden.
+Alle LUA-Quelltexte für das Projekt sind bereits in die Datei `smartmeter.img` zusammengefasst und compiliert. Diese Datei muß unbedingt im `LFS` installiert werden.
 
 Zwar können einzelne Dateien auch im `SPIFFS` auf dem ESP-8266 gespeichert werden, und diese haben dann Vorrang, aber das braucht eine Menge RAM(Heap) zur Laufzeit. Der FTP-server zum Beispiel funktioniert deswegen nur aus dem `LFS`.
 
 #### [start.lua](https://github.com/andreaskielkopf/smartmeter/raw/master/src/start.lua)
-Das ist das eigentliche Programm. Es wird nur dann gestartet, wenn `init.lua` die Brücke bei D1 findet. (`start.lua` und `init.lua` sind auch im LFS enthalten, aber `init.lua` kann nicht von dort starten)
+Das ist das eigentliche Programm. Wenn `D1` nicht vorhanden ist, kann `start.lua` auch per ESPlorer manuell gestartet werden.
 
 #### mit ESPlorer uploaden
 Alle diese Dateien ([`smartmeter.img`](https://github.com/andreaskielkopf/smartmeter/raw/master/src/smartmeter.img), `eus_params.lua`, [`start.lua`](https://github.com/andreaskielkopf/smartmeter/raw/master/src/start.lua) und zuletzt [`init.lua`](https://github.com/andreaskielkopf/smartmeter/raw/master/src/init.lua) müssen per [Upload] ins Dateisystem(`SPIFFS`) auf den ESP8266 übertragen werden.
@@ -119,12 +119,9 @@ ESPlorer -> [rechte Bildschirmhälfte] -> [Knopf RTS]
   `[RTS]` einschalten, kurz warten, ausschalten.
   Spätestens jetzt sollten die ESP-Startmeldungen im Fenster erscheinen.
 
-* Upload erste Datei ins `SPIFFS`
+* Upload von Dateien ins `SPIFFS`
 ```
-ESPlorer -> [linke Bildschirmhälfte] -> [NodeMCU & MicroPython] -> [Scripts] -> [Upload ...] "smartmeter.img"
-```
-
-* Nun das selbe mit den anderen Dateien ... 
+ESPlorer -> [linke Bildschirmhälfte] -> [NodeMCU & MicroPython] -> [Scripts] -> [Upload ...]
 
 * Dann überprüfen, ob es geklappt hat mit:
 ```
@@ -188,7 +185,7 @@ ergibt
 ### IR-Empfang
 **Achtung !** Der IR-Empfang ist in den ersten ca. 60 Sekunden **ausgeschaltet**. Danach blinkt die blaue LED genau 1x. Dann ist der IR-empfang scharfgeschaltet.
 
-Jeder Impuls des Smartmeters, der vom IR-Transistor empfangen wird, wird durch Aufblinken der blauen LED an D4 quittiert. Das kann man leicht mit einer beliebigen IR-Fernbedienung prüfen. 
+Jeder Impuls des Smartmeters, der vom IR-Transistor empfangen wird, wird durch Aufblinken der blauen LED an `D4` quittiert. Das kann man leicht mit einer beliebigen IR-Fernbedienung prüfen. 
 
 #### Wenn das nicht oder schlecht klappt:
 * Wackelkontakt der Leitung zum IR-Empfänger -> nachprüfen
@@ -219,13 +216,14 @@ Das Smartmeter im Zählerschrank hat oben in der Mitte eine kleine durchsichtige
 
 Über die kann der IR-Empfänger mit einem Klebeband geklebt werden. 
 Links davon steht `IR`. Rechts davon steht bei mir dran, dass `10.000 IR-Pulse pro kWh` gesendet werden. 
+
 Sobald das Modul eingesteckt ist, sollte nach 60 Sekunden die blaue LED zu blinken beginnen.
 
 # ToDo´s
 
-* Eine elegante [Update-Funktion der Software](https://github.com/andreaskielkopf/Smartmeter/blob/master/tips.md) über lokales FTP
-* Die Abfrage eines Tages liefer keine Daten, wenn die erste Stunde fehlt
-* Liste der vorhandene Dateien mit Messwerten
+* Eine elegante [Update-Funktion der Software](https://github.com/andreaskielkopf/Smartmeter/blob/master/update.md) über lokales FTP
+* Bug: Die Abfrage eines Tages liefer im Moment keine Daten, wenn die erste Stunde fehlt
+* Liste der vorhandene Dateien mit Messwerten per http erreichbar machen
 * Löschen alter Dateien bei Platzmangel (ca. 100kByte im SPIFS frei halten)
 * Zusätzliches Projekt um die Daten auszulesen und in einer GUI darzustellen [SmartmeterGui](https://github.com/andreaskielkopf/SmartmeterGui)
 
