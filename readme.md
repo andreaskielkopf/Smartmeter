@@ -97,7 +97,7 @@ Zwar können einzelne Dateien auch im `SPIFFS` auf dem ESP-8266 gespeichert werd
 Das ist das eigentliche Programm. Wenn `D1` nicht vorhanden ist, kann `start.lua` auch per ESPlorer manuell gestartet werden.
 
 #### mit ESPlorer uploaden
-Alle diese Dateien ([`smartmeter.img`](https://github.com/andreaskielkopf/smartmeter/raw/master/src/smartmeter.img), `eus_params.lua`, [`start.lua`](https://github.com/andreaskielkopf/smartmeter/raw/master/src/start.lua) und zuletzt [`init.lua`](https://github.com/andreaskielkopf/smartmeter/raw/master/src/init.lua) müssen per [Upload] ins Dateisystem(`SPIFFS`) auf den ESP8266 übertragen werden.
+Alle diese Dateien ([`smartmeter.img`](https://github.com/andreaskielkopf/smartmeter/raw/master/src/smartmeter.img), [`eus_params.lua`](https://github.com/andreaskielkopf/smartmeter/raw/master/src/eus_params.lu_), [`start.lua`](https://github.com/andreaskielkopf/smartmeter/raw/master/src/start.lua) und zuletzt [`init.lua`](https://github.com/andreaskielkopf/smartmeter/raw/master/src/init.lua) müssen per [Upload] ins Dateisystem(`SPIFFS`) auf den ESP8266 übertragen werden.
 (Bitte dazu erst mal die Brücke an D1 entfernen)
 
 * Ports refreshen
