@@ -30,6 +30,7 @@ Verwendet wird in diesem Fall Lua.
 ### Weitergehende Infos
  * https://nodemcu.readthedocs.io/en/release/
  * https://nodemcu.readthedocs.io/en/release/getting-started
+ * https://github.com/andreaskielkopf/SmartmeterGui
 
 ## Hardware
 Mögliche Hardware: D1-mini, NodeMCU, ...(mit ESP-8266)
@@ -64,7 +65,7 @@ Die Software enthält:
 * `ftp-server` (Zugang mit user=smart und passwort=meter)
   Zum direkten Zugang zu den Dateien (Lua-Programme und Messwerte) z.B. mit `mc` oder einem anderen ftp-Client
 * `http-server` 
-  Um die Messdaten programmatisch abfragen zu können z.B. mit `curl` oder SmartmeterGui
+  Um die Messdaten programmatisch abfragen zu können z.B. mit `curl` oder [SmartmeterGui](https://github.com/andreaskielkopf/SmartmeterGui)
 
 Damit das alles nicht zu viel RAM(`Heap`) braucht, muss der Großteil davon im LFS gespeichert sein. 
 Nur die Startdatei `init.lua` muss unbedingt im normalen Dateisystem(`SPIFFS`) liegen

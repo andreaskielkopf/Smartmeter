@@ -113,3 +113,56 @@ Die größe des SPIFFS wird automatisch größer, wenn weniger module einkompili
 
 export USER_PROLOG="Smartmeter © 2025 Andreas Kielkopf";make
 
+
+---
+
+
+# Hier kurz und präzise Links und Hinweise — aktuelle Infos zu NodeMCU auf ESP32 und geeignete Boards:
+
+Wichtige Quellen
+- NodeMCU-ESP32 (Projekt, Firmware, Docs): https://nodemcu.readthedocs.io/ (Dokumentation)  
+- NodeMCU-ESP32 GitHub (Quellcode, Releases, Issues): https://github.com/nodemcu/nodemcu-firmware (achte auf dev-esp32 branch / ESP32-spezifische Repos)  
+- NodeMCU-ESP32 community builds / Forks: suche auf GitHub nach "nodemcu-esp32" für aktuelle ESP-IDF-kompatible Builds.  
+- Espressif (ESP32-SDK, Datenblätter, Board-Referenz): https://www.espressif.com (ESP-IDF, SoC-Varianten, Modulspezifikationen)  
+- PlatformIO / Board-Index (Kompatible Devkits und board IDs): https://docs.platformio.org
+
+Welche ESP32-Varianten sind geeignet
+- Gängige und gut unterstützte Module/Devkits:
+  - ESP32-WROOM-32 / DevKitC (Standard, Dual-Core, gut für die meisten Projekte)  
+  - ESP32-WROOM-32D/32U (ähnlich, U = für externe Antenne)  
+  - ESP32-S3 (mehr AI/USB-Funktionen, PSRAM-Varianten sinnvoll bei Speicherbedarf)  
+  - ESP32-C3 (RISC‑V, weniger GPIOs, andere Peripherie — prüfen, ob NodeMCU-Build C3 unterstützt)  
+  - ESP32-CAM (Kamera‑Board; NodeMCU-Builds oft angepasst)  
+  - NodeMCU-32S (fertiges Devboard-Layout; gängig im Shop‑Segment)
+
+Worauf achten
+- Flash-Größe: mind. 4 MB empfohlen (mehr für Module mit Filesystem/mehr Lua-Module).  
+- PSRAM: wichtig bei speicherintensiven Lua-Operationen (z. B. viele Module/Bilder).  
+- Chip-Variante: prüfe, ob dein gewählter NodeMCU-ESP32-Build S3/C3 unterstützt (nicht alle Builds unterstützen alle SoC-Varianten).  
+- USB‑Serial-Chip und Boot-Buttons: erleichtern Flashen.
+
+Kurzempfehlung
+- Start: ESP32-WROOM-32 / DevKitC (4 MB Flash) oder NodeMCU-32S — maximale Kompatibilität mit vorhandenen NodeMCU-ESP32 Builds.  
+- Bei hohem Speicherbedarf: ESP32-S3 mit 8 MB Flash + PSRAM.
+
+
+---
+## Stromsparendstes Board
+- **ESP32-C3** (RISC‑V) ist in der Regel am stromsparendsten unter den aktuellen ESP32-Familien, besonders im Deep‑Sleep: typ. ~5–10 µA im Deep‑Sleep (abhängig vom Modul und Peripherie).  
+- **ESP32-S3** und **ESP32-WROOM-32** (Classic) haben höhere Deep‑Sleep-Ströme; typische Werte liegen eher im Bereich von ~20–150 µA je nach Modul/Revision und Peripherie.  
+Hinweis: tatsächlicher Verbrauch hängt stark von Peripherie (Spannungsregler, USB‑Serial, angeschlossene Sensoren, Pull‑Ups) und Board‑Layout ab — reine SoC‑Vergleiche gelten nur für Module mit ähnlichen externen Komponenten.
+
+## Board/Modul mit meisten Flash‑Optionen
+- **ESP32‑S3**-Module und viele ESP32-WROOM/ESP32-WROVER Varianten bieten die größten Flash‑Optionen:
+  - gängige Optionen: **4 MB**, **8 MB**, **16 MB** (seltener), manche WROVER-Module mit PSRAM kombinieren **8 MB Flash + PSRAM**.
+  - Beispiel: **ESP32-WROVER**-Module (häufig 8 MB Flash + 8 MB PSRAM).  
+- Für maximalen Flash such nach Modulen/Devkits mit explizit 16 MB Flash (Verfügbarkeit variabel).
+
+## Kurze Entscheidungshilfe
+- Wenn Energieverbrauch kritisch: wähle ein ESP32‑C3 Modul/Devkit und achte auf externe Komponenten (low‑IQ LDO, kein USB‑to‑UART immer aktiv, Schaltbare Peripherie).  
+- Wenn viel Flash notwendig: wähle ESP32‑WROVER/ESP32‑S3 Module mit 8–16 MB Flash (plus PSRAM falls benötigt).
+
+Wenn du möchtest, nenne ich konkrete Modul- oder Devkit-Modelle mit typischen Deep‑Sleep‑Messwerten und Flash‑Konfigurationen.
+
+
+
