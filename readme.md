@@ -122,7 +122,7 @@ ESPlorer -> [rechte Bildschirmhälfte] -> [Knopf RTS]
 * Upload von Dateien ins `SPIFFS`
 ```
 ESPlorer -> [linke Bildschirmhälfte] -> [NodeMCU & MicroPython] -> [Scripts] -> [Upload ...]
-
+```
 * Dann überprüfen, ob es geklappt hat mit:
 ```
 ESPlorer -> [rechte Bildschirmhälfte] -> [FS Info] -> [Reload] 
