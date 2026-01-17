@@ -164,5 +164,17 @@ Hinweis: tatsächlicher Verbrauch hängt stark von Peripherie (Spannungsregler, 
 
 Wenn du möchtest, nenne ich konkrete Modul- oder Devkit-Modelle mit typischen Deep‑Sleep‑Messwerten und Flash‑Konfigurationen.
 
+# ESP32
 
-
+```
+git clone --branch dev-esp32-idf3-final --recurse-submodules https://github.com/nodemcu/nodemcu-firmware.git nodemcu-firmware-esp32 
+```
+cd ~/git/nodemcu-firmware-esp32
+make config
+make
+install.sh
+. ./export.sh
+idf.py set-target esp32c3
+make all
+idf.py menuconfig
+idf.py -p /def/ttyACM0 flash
