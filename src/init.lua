@@ -5,7 +5,7 @@ do
    print(table.concat({'boot Test D', pinBoot, '==', levelBoot, ' ? '}))
    local boot= gpio.read(pinBoot)
    gpio.mode(pinBoot, gpio.INPUT, gpio.FLOAT) -- Pullup abschalten um Strom zu sparen
-   if boot then
+   if boot==levelBoot then
       boot= nil -- brauchen wir nicht mehr
       print 'boot OK'
       node.flashindex("_init")() -- LFS aktivieren
