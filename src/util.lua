@@ -60,7 +60,7 @@ do
    --         fd:close()
    --      end end
 
-   -- Iterator über Zeilen einer Datei
+   -- Iterator über Zeilen einer Datei. Liefert immer genau eine Zeile, bis die Datei zuende ist
    local function nextLine(name)
       local i, fd= 0, nil -- Zeilennummer
       print ('iterator über:', name)
@@ -69,26 +69,30 @@ do
          if fd then i= i+1
             local line= fd:readline()
             if line then return i, line end -- iterator läuft weiter
-            fd:close() end
-         fd= nil i= nil -- close, end
-         print 'end iterator'
-         return nil end -- iterator beenden
-   end
+            fd:close() end fd= nil -- close, end
+         print 'end iterator' end end -- iterator beenden
 
-   local function getObject(line)
+
+   local function line2Object(line)
       local text= table.concat({"return ", line}) -- zeile um "return " erweitern
       local chunk, err= loadstring(text) -- zeile interpretieren (compile)
       if chunk then err= nil return chunk() end -- wenn sie interpretierbar war, ausführen
       error(err) end -- fehler
 
+   -- Durchsucht die Zeile nach dem gewünschten Objekt
+   -- hour{'hallo',{1,2,3,4,5}}
+   -- oder nach einem namenlosen Objekt ( mit oder ohne führendes Komma )
+   -- ,{5,'temp',{105,12,24},'c°C'}'
+   -- Datensatz von 5 Uhr, Temperatur in centiGrad C
    local function getObj(oname, line)
       oname= oname or ''
       if line then
-         local a, b= line:find('%-%-')
-         if a then line= line:sub(1, a+1) end -- comments entfernen
-         a, b= line:find(oname) -- den rest interpretieren
-         if a then return getObject(line:sub(b+1)) end
-      end end -- datei interpretieren
+         local a, b= line:find('%-%-') -- Kommerntare entfernen bid zum Ende der Zeile
+         if a then line= line:sub(1, a+1) end
+         line= line:gsub("^,+","")-- führende Kommas entfernen
+         a, b= line:find(oname) -- den rest interpretieren wenn der Name enthalten ist (ab dem Ende des namens)
+         if a then return line2Object(line:sub(b+1)) end
+      end end -- datei interpretieren und als objekt zurückliefern
 
    -- wandle eine kleine zahl in bas64 um
    --   local b64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
@@ -125,8 +129,11 @@ do
       end if update then update() end -- jetzt noch schnell prüfen, ob ein update ansteht
    end
 
-   -- welche monate oder tage gibt es als Dateien (als Info für den PC)
-   local function welche(name)
+   -- welche Monate oder Tage gibt es als Dateien (als Info für den PC)
+   -- "2025" listet die Monate im Jahr die vorhanden sind
+   -- "2025-01" listet die Tage im Monat Januar 2025 die Vorhanden sind
+   -- "2025-01-05" listet die Stunden die in der Dazei vom 5.1.2025 enthalten sind ???
+   local function welcheDateien(name)
       local monate, keys, z= {}, {}, #name==1 and 6 or 9 -- zeiger auf monat(6) oder tag(9)
       -- Die Variable "monat" wird auch für "tag" genutzt wenn z=9 ist
       name[#name+1]= '[0-9-]+.lua' -- regex hinzufügen
@@ -148,7 +155,7 @@ do
    --   M.getObject=getObject nur lokal
    M.getObj= getObj
    M.clean= cleanUp
-   M.welche= welche
+   M.welche= welcheDateien
    print 'end util'
    return M
 end
