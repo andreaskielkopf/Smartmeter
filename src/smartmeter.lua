@@ -56,22 +56,24 @@ do
             --            print('sum=',i,stunde[2],#stunde[2],t,t[i])
          end end end
 
-   -- Angefragte Daten an den Webservber liefern
+   -- Angefragte Daten an den Webserver liefern
    local function data(anfrage) -- anfrage ist der angefragte text
       if type(anfrage)=='string' then -- 2025/12/01/xx
-         local tmp= {} -- tag=nil
+         local tmp= {} 
          for c in anfrage:gmatch("[0-9]+") do tmp[#tmp+1]= c end
          local x
          if #tmp>0 then
             x= table.concat(tmp, '-', 1, #tmp>3 and 3 or #tmp)
          end-- print (datum)
-         if #tmp==1 or #tmp==2 then -- anfrage 2025 Liste der Monate im Dateisystem für dieses Jahr
-            -- "2025"={01,02,03,05,06,07,12}
-            -- "2025-04"={12,17,22,23,24,30,31}
+         if #tmp==1 or #tmp==2 then -- anfrage 2025 Liste Monate oder Tage
+            -- "2025"={01,02,03,05,06,07,12} Monate im Jahr 2025
+            -- "2025-04"={12,17,22,23,24,30,31} Tage im Monat April 2025
             return table.concat({'{"filter":"', x, '", "found":[', table.concat(util_.welche(tmp), ','), ']}'})
          elseif #tmp==3 then -- anfrage 2025/12/01 Der ganzze tag
+            -- "2025-12-01"={1,2,7,8,14,22} Stunden am 1.12.2025
             return table.concat({'{"date":"', x, '", "hours":[', table.concat(day_.stunden(x), ','), ']}'})
          elseif #tmp==4 then -- anfrage 2025/12/01/xx nach einer bestimmten Stunde
+            -- 2025-12-01-xx Messwerte pro Minute in dieser Stunde (bis zu 60 Messwerte)
             local uhr= tmp[4]+0 -- in number umwandeln
             if type(uhr)=='number' then
                local h= hour_.get(x, uhr)
