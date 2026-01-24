@@ -22,16 +22,14 @@ do
    --         else
    --            print(" "..k1.." \t= "..v1 ) end end end
 
-   -- Ermittle ob die datei als *.lua oder als *.lc Datei vorliegt, oder gar nicht
+   -- Ermittle ob die datei als .lua, .lc oder als .var -Datei vorliegt, oder gar nicht
    -- usage: filename=fName(a or b or c)
    local function fName(name)
-      local lc= table.concat({name, '.lc'}) -- compiliertes lua
-      if file.exists(lc) then return lc end -- name.lc
-      local lua= table.concat({name, '.lua'}) -- klartext lua
-      if file.exists(lua) then return lua end -- name.lua
-      local var= table.concat({name, '.var'}) -- binärdate mit varint Datensätzen
-      if file.exists(var) then return var end -- name.lua      
-      return nil end -- nicht da
+      local d=name
+      for _,v in ipairs({'.lc','.lua','.var'}) do
+         d= table.concat({name, v}) -- zusammenfügen
+         if file.exists(d) then return d,v end -- dateiname, und Endung
+      end end -- return nil end -- nicht da
 
    --   local function printPT()
    --      local p=node.getpartitiontable()

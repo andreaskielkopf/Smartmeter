@@ -4,6 +4,7 @@ do
    local util_= require 'util'
    local zeit_= require 'zeit' -- aber es dauert einige Zeit bis today aktuell ist !!!
    local hour_= require 'hour'
+   local vint_= require 'varint'
 
    -- liefert den Datensatz eines Tages aus den vorhanden Dateien,
    -- oder einen leeren Datensatz für diesen Tag als verschachtelte Tabelle
@@ -49,18 +50,6 @@ do
                end end end end
       return lines end
 
-   --   local function dayToBase64(day) -- consumer = verbraucht die daten und liefert ein array mit textzeilen
-   --      local lines={}
-   --      if day and day[1] then
-   --         lines[1]=table.concat({"date{'",day[1],"'}"})
-   --         local stunden=day[2]
-   --         if type(stunden)=='table' and #stunden>0 then
-   --            for i=0,24 do
-   --               if stunden[i] then
-   --                  lines[#lines+1]=hour_.toBase64(stunden[i])
-   --               end end end end
-   --      return lines end
-
    -- consumer = verbraucht die daten und liefert ein array mit textzeilen
    --      local function dayToJson(day)
    --         if day and day[1] then
@@ -85,12 +74,13 @@ do
    --            return lines end
    --      return {} end
 
-   -- erzeugt die datei für den aktuellen Tag
+   -- erzeugt die leere Datei für den aktuellen Tag
    local function dayCreate(datum)
-      if not util_.fName(datum) and datum and #datum==10 then -- nur wenn es ein heute gibt
+      if not util_.fName(datum) and datum and #datum==10 then --wenn es datum gibt, und keine Datei existiert
          -- print ('create day Lua:',datum,'\n', table.concat(dayToLua(getDay(datum)),'\n'))
-         local fd= file.open(table.concat({datum, '.lua'}), "a")
-         for _, line in ipairs(dayToLua(getDay(datum))) do fd:writeline(line) end
+         --         local fd= file.open(table.concat({datum, '.lua'}), "a")
+         local fd= file.open(table.concat({datum, '.var'}), "a")
+         --         for _, line in ipairs(dayToLua(getDay(datum))) do fd:writeline(line) end
          fd:close() fd= nil end
       return getDay(datum) end  --vorhandene Datei übergeben
 

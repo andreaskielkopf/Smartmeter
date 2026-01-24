@@ -6,12 +6,7 @@ do
    local util_= require 'util'
    --   local ring= require 'ring'
    local stunde, nr
-
-   --   local function test()
-   --      print ''
-   --      hour_.test()
-   --      day_.test()
-   --   end
+   --   local function test() print '' hour_.test() day_.test() end
 
    -- Datensatz für heute vorbereiten und stunde laden, dann IRQ aktivieren
    local function init(tag_, stunde_)
@@ -33,8 +28,8 @@ do
          --         print(table.concat({'jetzt ist ',tag_neu,"(",stunde_neu,":",minute_neu,')'}))
          --         print ('min:', node.heap())
          --         print('>',stunde,stunde_alt,stunde_neu,tag_alt)
-         if stunde_alt~=stunde_neu then 
-            hour_.append(tag_alt, stunde) -- stunde speichern 
+         if stunde_alt~=stunde_neu then
+            hour_.append(tag_alt, stunde) -- stunde speichern
             jetzt.stunde= stunde_neu
             if tag_alt~=tag_neu then -- tag anpassen
                day_.create(tag_neu) -- day_.compile(tag_alt)
@@ -59,7 +54,7 @@ do
    -- Angefragte Daten an den Webserver liefern
    local function data(anfrage) -- anfrage ist der angefragte text
       if type(anfrage)=='string' then -- 2025/12/01/xx
-         local tmp= {} 
+         local tmp= {}
          for c in anfrage:gmatch("[0-9]+") do tmp[#tmp+1]= c end
          local x
          if #tmp>0 then
