@@ -50,7 +50,7 @@ do
    --      j,l=str2var(var2str(i))
    --      if i~=j then print (i,j,l) end end
 
-   -- wandelt ein array von zahlen in einen string um
+   -- wandelt ein array von Ints(31Bit) in einen String mit Varints um
    local function vars2str(t)
       local s={} -- '0v' -- markierung für string mit varints -> table of ints
       if t==nil or type(t)~='table' or #t < 1 then return "" end
@@ -58,26 +58,46 @@ do
          s[#s+1]=var2str(v)
       end return table.concat(s) end
    --   local a={} for i=1,60 do a[i]= i*(i+37)/19 end a= vars2str(a) print (a)
-   local a={} for i=1,60 do a[i]= i*1000 end a= vars2str(a) 
---   print(a)
+   local a={} for i=1,60 do a[i]= i*1000 end a= vars2str(a)
+   --   print(a)
 
    -- Iterator über einen String der Zahlen findet und zurückgibt
    local function nextZahl(s)
       local i, p= 0, 0 -- index der Zahl, position im String
       return function()
          local z
-         if p+1<#s then i= i+1 -- print(s,p,#s)
+         if p+1<=#s then i= i+1 -- print(s,p,#s)
             z,p= str2var(s,p+1) -- print (z,p)
             if z then return i, z end -- iterator läuft weiter
          end end end -- iterator beenden return nil
    --   for k,v in nextZahl(a) do print (k,v) end print (#a)
 
-   -- wandelt einen String in ein array von zahlen um
+   -- wandelt einen String mit Varints in ein array von Ints(je 31Bit)
    local function str2vars(t)
       local a={}
       for k,v in nextZahl(t) do a[k]=v end
       return a end
---   for k,v in ipairs(str2vars(a)) do print (k,v) end
+   --   for k,v in ipairs(str2vars(a)) do print (k,v) end
+
+   -- Wandelt einen Datensatz mit Kennung, Nr und Array[int] zu einer Zeile im Dateisystem
+   local function data2Line(k,n,a)
+      -- Ziel: kennung als text (0-x char, [a-z]), stunde (00-23 2char[0-9]), string mit varint beliebig (bis zu 60)
+      local z1= (n<=9) and '0' or ''
+      local l={k,z1,tostring(n),vars2str(a)}
+      return table.concat(l) end
+
+   -- Wandelt eine Zeile aus dem Dateisystem in einen Datensatz mit Kennung, Nr und Array[int]
+   local function line2Data(l)
+      local k,n,a -- print (l)
+      k,n,a=l:match("^(%a*)(%d%d)(.*)$") -- print(#k,#n,#a)
+      return k,n,str2vars(a) end
+
+   --   do for i=0,23 do
+   --      local k1,n1,a1="test",9,{0,i*i*i*i*i*i*i,2,i*i,i*i*i*i,5}
+   --      local l2=data2Line(k1,i,a1)
+   --      local k2,n2,a2=line2Data(l2)
+   --          print (k2,n2,#l2,a2[1],a2[2],a2[3],a2[4],a2[5],a2[6])
+   --   end end
 
    -- decodierung für strings
    M.t2s=vars2str -- Tabelle -> String
