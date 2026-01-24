@@ -88,8 +88,7 @@ do
 
    -- Wandelt eine Zeile aus dem Dateisystem in einen Datensatz mit Kennung, Nr und Array[int]
    local function line2Data(l)
-      local k,n,a -- print (l)
-      k,n,a=l:match("^(%a*)(%d%d)(.*)$") -- print(#k,#n,#a)
+      local k,n,a=l:match("^(%a*)(%d%d)(.*)$") -- print(#k,#n,#a)
       return k,n,str2vars(a) end
 
    --   do for i=0,23 do
@@ -100,8 +99,10 @@ do
    --   end end
 
    -- decodierung für strings
-   M.t2s=vars2str -- Tabelle -> String
-   M.s2t=str2vars -- String -> Tabelle
+   M.t2s= vars2str -- Tabelle -> String
+   M.s2t= str2vars -- String -> Tabelle
+   M.l2d= line2Data
+   M.d2l= data2Line
    print 'end varint'
    return M
 end
