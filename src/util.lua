@@ -26,8 +26,8 @@ do
    -- usage: filename=fName(a or b or c)
    local function fName(name)
       local d=name
-      for _,v in ipairs({'.lc','.lua','.var'}) do
-         d= table.concat({name, v}) -- zusammenfügen
+      for _,v in ipairs({'lc','lua','var'}) do
+         d= table.concat({name,'.', v}) -- zusammenfügen
          if file.exists(d) then return d,v end -- dateiname, und Endung
       end end -- return nil end -- nicht da
 
