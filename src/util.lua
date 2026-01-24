@@ -25,10 +25,12 @@ do
    -- Ermittle ob die datei als *.lua oder als *.lc Datei vorliegt, oder gar nicht
    -- usage: filename=fName(a or b or c)
    local function fName(name)
-      local lc= table.concat({name, '.lc'})
+      local lc= table.concat({name, '.lc'}) -- compiliertes lua
       if file.exists(lc) then return lc end -- name.lc
-      local lua= table.concat({name, '.lua'})
+      local lua= table.concat({name, '.lua'}) -- klartext lua
       if file.exists(lua) then return lua end -- name.lua
+      local var= table.concat({name, '.var'}) -- binärdate mit varint Datensätzen
+      if file.exists(var) then return var end -- name.lua      
       return nil end -- nicht da
 
    --   local function printPT()
