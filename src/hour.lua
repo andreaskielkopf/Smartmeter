@@ -13,11 +13,11 @@ do
       tag= tag or jetzt.heute or '2025-12-01'
       stunde= stunde or jetzt.stunde or 15 -- default 14:00 Uhr bis 14:59
       local filename,ext= util_.fName(tag)
-      local gefunden      
+      local gefunden
       for _, line in util_.nextLine(filename) do
          if ext=='var' then -- binär interpretieren
             local k,n,a= vint_.l2d(line)
-            if k=='hour' and type(a)=='table' and n==stunde then 
+            if k=='hour' and type(a)=='table' and n==stunde then
                gefunden= {n, a} end-- liefere die letzte gefundene Zeile
          else -- konventionell interpretieren
             local hour= util_.getObj('hour', line)
@@ -60,13 +60,19 @@ do
    --      return table.concat({'{"hour":', stunde, ', "ticks":[', table.concat(ticks), ']}'})
    --   end
 
-   -- speichert in das angegebene datum diesen stundendatensatz
+   -- speichert diesen Stunden-Datensatz in das angegebene Datum
    local function hourAppend(datum, stunde)
-      local lua= table.concat({datum, '.lua'})
-      if stunde and file.exists(lua) then
-         local fd= file.open(lua, "a")
-         fd:writeline(hourToLua(stunde))
-         fd:close() fd= nil end end
+      local dat,ext= util_.fName(datum)
+      if dat and stunde then
+         local fd= file.open(dat, "a")
+         if ext=='lua' then
+            fd:writeline(hourToLua(stunde)) -- konventionell schreiben
+         elseif ext=='var' then
+            local st, ti= hourToTable(stunde)
+            fd:writeline(vint_.d2l('hour',st,ti)) -- binär schreiben
+         end
+         fd:close() fd= nil
+      end end
 
    --   local function test()
    --      local erg=getHour('2025-12-01',4)
