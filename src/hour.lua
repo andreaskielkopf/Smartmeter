@@ -3,6 +3,7 @@ do
    local M= {}
    local util_= require 'util'
    local zeit_= require 'zeit' -- aber es dauert einige Zeit bis today aktuell ist !!!
+   local vint_= require 'varint'
 
    -- liefert den Datensatz für die angegebene Stunde aus den vorhandenen Dateien
    -- oder einen leeren Datensatz für diese Stunde als Liste (einfach durchnummeriert)
@@ -11,15 +12,19 @@ do
    local function getHour(tag, stunde) -- aufruf mit dem gewünschten datum
       tag= tag or jetzt.heute or '2025-12-01'
       stunde= stunde or jetzt.stunde or 15 -- default 14:00 Uhr bis 14:59
-      local filename= util_.fName(tag)
-      local gefunden
+      local filename,ext= util_.fName(tag)
+      local gefunden      
       for _, line in util_.nextLine(filename) do
-         local hour= util_.getObj('hour', line)
-         if hour and hour[1] and hour[1]==stunde then
-            --            return hour -- liefere die erste gefundene Zeile
-            gefunden= hour -- liefere die letzte gefundene Zeile
-         end end -- datei interpretieren
-      return gefunden or {stunde, {}} end
+         if ext=='var' then -- binär interpretieren
+            local k,n,a= vint_.l2d(line)
+            if k=='hour' and type(a)=='table' and n==stunde then 
+               gefunden= {n, a} end-- liefere die letzte gefundene Zeile
+         else -- konventionell interpretieren
+            local hour= util_.getObj('hour', line)
+            if type(hour)=='table' and hour[1] and hour[1]==stunde then
+               gefunden= hour end-- liefere die letzte gefundene Zeile
+         end
+      end return gefunden or {stunde, {}} end
 
    -- Tabelle {Stunde, {0 bis zu 60 x(Takte je Minute)}}
    -- wird nur lokal genutzt
@@ -49,11 +54,11 @@ do
    end
 
    -- Tabelle in Base64 codieren
---   local function hourToBase64(h) -- Aufruf mit einer StundenTabelle
---      local stunde, ticks= hourToTable(h)
---      ticks=util_.tBase64(ticks)
---      return table.concat({'{"hour":', stunde, ', "ticks":[', table.concat(ticks), ']}'})
---   end
+   --   local function hourToBase64(h) -- Aufruf mit einer StundenTabelle
+   --      local stunde, ticks= hourToTable(h)
+   --      ticks=util_.tBase64(ticks)
+   --      return table.concat({'{"hour":', stunde, ', "ticks":[', table.concat(ticks), ']}'})
+   --   end
 
    -- speichert in das angegebene datum diesen stundendatensatz
    local function hourAppend(datum, stunde)
@@ -74,7 +79,7 @@ do
 
    --   M.test=test
 
---   M.toBase64=hourToBase64
+   --   M.toBase64=hourToBase64
    M.get= getHour        -- Datensatz für eine Stunde
    M.append= hourAppend
    M.toLua= hourToLua      -- diese Stunde Serialisieren
