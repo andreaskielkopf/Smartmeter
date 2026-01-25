@@ -59,7 +59,7 @@ do
          local x
          if #tmp>0 then
             x= table.concat(tmp, '-', 1, #tmp>3 and 3 or #tmp)
-         end-- print (datum)
+         end -- print (datum)
          if #tmp==1 or #tmp==2 then -- anfrage 2025 Liste Monate oder Tage
             -- "2025"={01,02,03,05,06,07,12} Monate im Jahr 2025
             -- "2025-04"={12,17,22,23,24,30,31} Tage im Monat April 2025
