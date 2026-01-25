@@ -91,12 +91,12 @@ do
       local k,n,a=l:match("^(%a*)(%d%d)(.*)$") -- print(#k,#n,#a)
       return k,n,str2vars(a) end
 
-   --   do for i=0,23 do
-   --      local k1,n1,a1="test",9,{0,i*i*i*i*i*i*i,2,i*i,i*i*i*i,5}
-   --      local l2=data2Line(k1,i,a1)
-   --      local k2,n2,a2=line2Data(l2)
-   --          print (k2,n2,#l2,a2[1],a2[2],a2[3],a2[4],a2[5],a2[6])
-   --   end end
+--      do for i=0,23 do
+--         local k1,n1,a1="test",9,{0,i*i*i*i*i*i,2,i*i,i*i*i*i,5}
+--         local l2=data2Line(k1,i,a1)
+--         local k2,n2,a2=line2Data(l2)
+--             print (k2,n2,#l2,a2[1],a2[2],a2[3],a2[4],a2[5],a2[6])
+--      end end
 
    -- decodierung für strings
    M.t2s= vars2str -- Tabelle -> String
