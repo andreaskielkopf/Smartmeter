@@ -87,7 +87,7 @@ do
       return table.concat(l) end
 
    -- Wandelt eine Zeile aus dem Dateisystem in einen Datensatz mit Kennung, Nr und Array[int]
-   local function line2Data(l)
+   local function line2Data(l)   
       local k,n,a=l:match("^(%a*)(%d%d)(.*)$") -- print(#k,#n,#a)
       return k,n,str2vars(a) end
 

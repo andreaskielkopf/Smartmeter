@@ -70,7 +70,8 @@ do
             local line= fd:readline()
             if line then return i, line end -- iterator läuft weiter
             fd:close() end fd= nil -- close, end
-         print 'end iterator' end end -- iterator beenden
+         --print 'end iterator'
+      end end -- iterator beenden
 
 
    local function line2Object(line)
