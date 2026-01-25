@@ -14,16 +14,19 @@ do
       stunde= stunde or jetzt.stunde or 15 -- default 14:00 Uhr bis 14:59
       local filename,ext= util_.fName(tag)
       local gefunden
-      for _, line in util_.nextLine(filename) do
-         if ext=='var' then -- binär interpretieren
-            local k,n,a= vint_.l2d(line)
-            if k=='hour' and type(a)=='table' and n==stunde then
-               gefunden= {n, a} end-- liefere die letzte gefundene Zeile
-         else -- konventionell interpretieren
-            local hour= util_.getObj('hour', line)
-            if type(hour)=='table' and hour[1] and hour[1]==stunde then
-               gefunden= hour end-- liefere die letzte gefundene Zeile
-         end
+      for _, line in util_.nextLine(filename) do -- zeilen inclusiv 0x0A
+         if ext=='var' and #line>2 then -- binär interpretieren
+            local k,n,a= vint_.l2d(line:sub(1,-2)) -- 0x0A entfernen
+            if k=='hour' and type(a)=='table' and stunde==(n+0) then
+               --            print 'treffer'
+--               print (k,n,stunde,#a)
+               gefunden= {n, a}
+            end-- liefere die letzte gefundene Zeile
+      elseif ext=='lua' then -- konventionell interpretieren
+         local hour= util_.getObj('hour', line)
+         if type(hour)=='table' and hour[1] and hour[1]==stunde then
+            gefunden= hour end-- liefere die letzte gefundene Zeile
+      end
       end return gefunden or {stunde, {}} end
 
    -- Tabelle {Stunde, {0 bis zu 60 x(Takte je Minute)}}
