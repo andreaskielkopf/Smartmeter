@@ -117,7 +117,7 @@ do
    -- Lösche solange Dateien im SPIFFS bis genug Platz frei ist
    local function cleanUp(soll)
       soll= soll and soll>75000 and soll or 100000 -- halte 100kByte frei im Falle eines Updates
-      local names, map= {}, file.list('[0-9-]+.lua') -- map(filename:size) von 2025-12-01.lua ...
+      local names, map= {}, file.list('20[0-9-]+.[lv][ua][ar]') -- map(filename:size) von 2025-12-01.lua .var
       for key, _ in pairs(map) do names[#names+1]= key end -- filenamen zusammentragen die zu Tagen gehören
       table.sort(names) -- sortieren, damit älteste zuerst gelöscht werden
       for _, name in ipairs(names) do
@@ -136,7 +136,7 @@ do
    local function welcheDateien(name)
       local monate, keys, z= {}, {}, #name==1 and 6 or 9 -- zeiger auf monat(6) oder tag(9)
       -- Die Variable "monat" wird auch für "tag" genutzt wenn z=9 ist
-      name[#name+1]= '[0-9-]+.lua' -- regex hinzufügen
+      name[#name+1]= '[0-9-]+.[lv][ua][ar]' -- regex hinzufügen für .lua und .var
       local map= file.list(table.concat(name, '.')) -- regex erzeugen
       for key, _ in pairs(map) do -- print (key)
          local m= key:sub(z, z+1)
