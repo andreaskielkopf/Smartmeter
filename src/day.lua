@@ -4,6 +4,7 @@ do
    local util_= require 'util'
    local zeit_= require 'zeit' -- aber es dauert einige Zeit bis today aktuell ist !!!
    local hour_= require 'hour'
+   local vint_= require 'varint'
 
    -- liefert den Datensatz eines Tages aus den vorhanden Dateien,
    -- oder einen leeren Datensatz für diesen Tag als verschachtelte Tabelle
@@ -12,24 +13,44 @@ do
    -- Aufruf mit dem gewünschten Datum
    local function getDay(datum)
       datum= datum or jetzt.heute or '2025-12-01'
-      local stunden, filename= {}, util_.fName(datum)
+      local stunden= {}
+      local filename,ext= util_.fName(datum)
       local erg= {datum, stunden} -- Tabelle mit den Stunden ist erstmal leer
       for _, line in util_.nextLine(filename) do
-         local h= util_.getObj('hour', line) line= nil
-         if h then
-            if type(h)=='table' and #h==2 and type(h[2])=='table' then
-               local uhr, takte= h[1], {} -- uhrzeit,array
-               for k, v in ipairs(h[2]) do -- Reihenfolge beibehalten
-                  if v>0 then takte[k]= v end -- Nullen entfernen
-               end
+         if ext=='lua' then
+            local h= util_.getObj('hour', line) line= nil
+            if h then
+               if type(h)=='table' and #h==2 and type(h[2])=='table' then
+                  local uhr, takte= h[1], {} -- uhrzeit,array
+                  for k, v in ipairs(h[2]) do -- Reihenfolge beibehalten
+                     if v>0 then takte[k]= v end -- Nullen entfernen
+                  end
+                  if #takte>0 then
+                     stunden[uhr]= {uhr, takte} -- print (stunden[uhr][1],#stunden[uhr][2])
+                  end end h=nil
+            else
+               local d= util_.getObj('date', line) line=nil
+               if d and type(d)=='table' and d[1] then
+                  erg[1]= d[1] end d=nil
+            end
+         elseif ext=='var' then
+            -- print (datum,nr,line)
+            local ke,uhr,a= vint_.l2d(line) line= nil
+            --            print (ke,uhr,a,#a)
+            if ke=='hour' and type(a)=='table' then
+               local takte= {} -- array
+               for k, v in ipairs(a) do -- Reihenfolge beibehalten, Nullen entfernen, ersten Eintrag lassen
+                  if v>0 or k==1 then takte[k]= v end end
+               --               print(#a,#takte)
                if #takte>0 then
                   stunden[uhr]= {uhr, takte} -- print (stunden[uhr][1],#stunden[uhr][2])
-               end end h=nil
-         else
-            local d= util_.getObj('date', line) line=nil
-            if d and type(d)=='table' and d[1] then
-               erg[1]= d[1] end d=nil
-         end end return erg end
+               end
+            end
+         end
+      end
+      --      print ()
+      return erg
+   end
 
    -- Tabelle {Tag, {Stunde1, Stunde2, Stunde3 ...}
    -- wird zu:
@@ -48,18 +69,6 @@ do
                   lines[#lines+1]= hour_.toLua(stunden[i])
                end end end end
       return lines end
-
-   --   local function dayToBase64(day) -- consumer = verbraucht die daten und liefert ein array mit textzeilen
-   --      local lines={}
-   --      if day and day[1] then
-   --         lines[1]=table.concat({"date{'",day[1],"'}"})
-   --         local stunden=day[2]
-   --         if type(stunden)=='table' and #stunden>0 then
-   --            for i=0,24 do
-   --               if stunden[i] then
-   --                  lines[#lines+1]=hour_.toBase64(stunden[i])
-   --               end end end end
-   --      return lines end
 
    -- consumer = verbraucht die daten und liefert ein array mit textzeilen
    --      local function dayToJson(day)
@@ -85,12 +94,13 @@ do
    --            return lines end
    --      return {} end
 
-   -- erzeugt die datei für den aktuellen Tag
+   -- erzeugt die leere Datei für den aktuellen Tag
    local function dayCreate(datum)
-      if not util_.fName(datum) and datum and #datum==10 then -- nur wenn es ein heute gibt
+      if not util_.fName(datum) and datum and #datum==10 then --wenn es datum gibt, und keine Datei existiert
          -- print ('create day Lua:',datum,'\n', table.concat(dayToLua(getDay(datum)),'\n'))
-         local fd= file.open(table.concat({datum, '.lua'}), "a")
-         for _, line in ipairs(dayToLua(getDay(datum))) do fd:writeline(line) end
+         --         local fd= file.open(table.concat({datum, '.lua'}), "a")
+         local fd= file.open(table.concat({datum, '.var'}), "a")
+         --         for _, line in ipairs(dayToLua(getDay(datum))) do fd:writeline(line) end
          fd:close() fd= nil end
       return getDay(datum) end  --vorhandene Datei übergeben
 

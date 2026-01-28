@@ -52,7 +52,7 @@ do
       end )
       print "HTTP server running on port 80" end
 
-   init()   
+   init()
    print "end server"
    return M
 end

@@ -5,13 +5,8 @@ do
    local day_= require 'day'
    local util_= require 'util'
    --   local ring= require 'ring'
-   local stunde, nr
-
-   --   local function test()
-   --      print ''
-   --      hour_.test()
-   --      day_.test()
-   --   end
+   local stunde,nr,nr_c
+   --   local function test() print '' hour_.test() day_.test() end
 
    -- Datensatz für heute vorbereiten und stunde laden, dann IRQ aktivieren
    local function init(tag_, stunde_)
@@ -33,8 +28,8 @@ do
          --         print(table.concat({'jetzt ist ',tag_neu,"(",stunde_neu,":",minute_neu,')'}))
          --         print ('min:', node.heap())
          --         print('>',stunde,stunde_alt,stunde_neu,tag_alt)
-         if stunde_alt~=stunde_neu then 
-            hour_.append(tag_alt, stunde) -- stunde speichern 
+         if stunde_alt~=stunde_neu then
+            hour_.append(tag_alt, stunde) -- stunde speichern
             jetzt.stunde= stunde_neu
             if tag_alt~=tag_neu then -- tag anpassen
                day_.create(tag_neu) -- day_.compile(tag_alt)
@@ -42,36 +37,55 @@ do
             end
             stunde= hour_.get(tag_neu, stunde_neu) -- neue stunde vorbereiten
          end
-         nr= minute_neu+1 -- pointer für den IRQ anpassen
+         if nr~=minute_neu+1 then nr= minute_neu+1 nr_c= true end -- pointer für den IRQ anpassen
          if tag_alt~=tag_neu then util_.clean() end -- cleanup am ende des tages
       end end
 
    -- Die Daten vom IRQ entgegennehmen und in die aktuelle stunde eintragen
-   local function irPuls(count) -- print ('irPuls',stunde,nr)
+   local function irPuls(cnt,when,last) -- print ('irPuls',stunde,nr,q)
       if stunde and type(stunde[2])=='table' then
+         cnt=cnt*6 -- umrechnung in WattMinuten
          local t, i= stunde[2], nr -- nr ist der globale Zeiger auf die aktuelle minute
          if i then
-            if t[i] then t[i]= t[i]+count -- increment
-            else         t[i]= count  end -- anlegen
+            if i>1 and nr_c and last then -- mit Abgleich
+            	 nr_c= false
+               local ms_d= (when-last+500)/1000 -- Millisekunden Abstand (Überlauf möglich)
+               ms_d= ms_d>0 and ms_d or 1 -- Division durch 0 verhindern 
+               local uts,us= rtctime.get()
+               local cal= rtctime.epoch2cal(uts)
+               local s= cal.sec
+               local ms_2= 1000*s+ (us/1000) -- Millisekunden in der neuen Minute
+               local c2= (cnt*ms_2)/ms_d -- Anteile in der neuen Minute
+               c2= c2>cnt and cnt or c2
+               c2= c2<0 and 0 or c2 -- bei Überlauf von ms_d               
+               local c1= cnt-c2
+               t[i-1]= t[i-1] and t[i-1]+c1 or c1
+               t[i]=   t[i]   and t[i]+c2   or c2
+               print('irPuls:',c1,c2,ms_d-ms_2,ms_2)
+            else -- ohne Abgleich
+               t[i]=   t[i]   and t[i]+cnt or cnt
+            end
             --            print('sum=',i,stunde[2],#stunde[2],t,t[i])
          end end end
 
-   -- Angefragte Daten an den Webservber liefern
+   -- Angefragte Daten an den Webserver liefern
    local function data(anfrage) -- anfrage ist der angefragte text
       if type(anfrage)=='string' then -- 2025/12/01/xx
-         local tmp= {} -- tag=nil
+         local tmp= {}
          for c in anfrage:gmatch("[0-9]+") do tmp[#tmp+1]= c end
          local x
          if #tmp>0 then
             x= table.concat(tmp, '-', 1, #tmp>3 and 3 or #tmp)
-         end-- print (datum)
-         if #tmp==1 or #tmp==2 then -- anfrage 2025 Liste der Monate im Dateisystem für dieses Jahr
-            -- "2025"={01,02,03,05,06,07,12}
-            -- "2025-04"={12,17,22,23,24,30,31}
+         end -- print (datum)
+         if #tmp==1 or #tmp==2 then -- anfrage 2025 Liste Monate oder Tage
+            -- "2025"={01,02,03,05,06,07,12} Monate im Jahr 2025
+            -- "2025-04"={12,17,22,23,24,30,31} Tage im Monat April 2025
             return table.concat({'{"filter":"', x, '", "found":[', table.concat(util_.welche(tmp), ','), ']}'})
          elseif #tmp==3 then -- anfrage 2025/12/01 Der ganzze tag
+            -- "2025-12-01"={1,2,7,8,14,22} Stunden am 1.12.2025
             return table.concat({'{"date":"', x, '", "hours":[', table.concat(day_.stunden(x), ','), ']}'})
          elseif #tmp==4 then -- anfrage 2025/12/01/xx nach einer bestimmten Stunde
+            -- 2025-12-01-xx Messwerte pro Minute in dieser Stunde (bis zu 60 Messwerte)
             local uhr= tmp[4]+0 -- in number umwandeln
             if type(uhr)=='number' then
                local h= hour_.get(x, uhr)
