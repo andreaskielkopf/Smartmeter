@@ -117,6 +117,7 @@ do
 
    -- Lösche solange Dateien im SPIFFS bis genug Platz frei ist
    local function cleanUp(soll)
+      if update then update() end -- vorher noch schnell prüfen, ob ein update ansteht
       soll= soll and soll>75000 and soll or 100000 -- halte 100kByte frei im Falle eines Updates
       local names, map= {}, file.list('20[0-9-]+.[lv][ua][ar]') -- map(filename:size) von 2025-12-01.lua .var
       for key, _ in pairs(map) do names[#names+1]= key end -- filenamen zusammentragen die zu Tagen gehören
@@ -127,8 +128,7 @@ do
             print(table.concat({"remove ", name, "(", map[name], ') rest=', remaining}))
             file.remove(name) -- eine Datei löschen
          else break end -- abbrechen sobald der Platz reicht
-      end if update then update() end -- jetzt noch schnell prüfen, ob ein update ansteht
-   end
+      end end
 
    -- welche Monate oder Tage gibt es als Dateien (als Info für den PC)
    -- "2025" listet die Monate im Jahr die vorhanden sind
