@@ -5,7 +5,7 @@ do
    local day_= require 'day'
    local util_= require 'util'
    --   local ring= require 'ring'
-   local stunde, nr
+   local stunde,nr,nr_c
    --   local function test() print '' hour_.test() day_.test() end
 
    -- Datensatz für heute vorbereiten und stunde laden, dann IRQ aktivieren
@@ -37,17 +37,34 @@ do
             end
             stunde= hour_.get(tag_neu, stunde_neu) -- neue stunde vorbereiten
          end
-         nr= minute_neu+1 -- pointer für den IRQ anpassen
+         if nr~=minute_neu+1 then nr= minute_neu+1 nr_c= true end -- pointer für den IRQ anpassen
          if tag_alt~=tag_neu then util_.clean() end -- cleanup am ende des tages
       end end
 
    -- Die Daten vom IRQ entgegennehmen und in die aktuelle stunde eintragen
-   local function irPuls(count) -- print ('irPuls',stunde,nr)
+   local function irPuls(cnt,when,last) -- print ('irPuls',stunde,nr,q)
       if stunde and type(stunde[2])=='table' then
+         cnt=cnt*6 -- umrechnung in WattMinuten
          local t, i= stunde[2], nr -- nr ist der globale Zeiger auf die aktuelle minute
          if i then
-            if t[i] then t[i]= t[i]+count -- increment
-            else         t[i]= count  end -- anlegen
+            if i>1 and nr_c and last then -- mit Abgleich
+            	 nr_c= false
+               local ms_d= (when-last+500)/1000 -- Millisekunden Abstand (Überlauf möglich)
+               ms_d= ms_d>0 and ms_d or 1 -- Division durch 0 verhindern 
+               local uts,us= rtctime.get()
+               local cal= rtctime.epoch2cal(uts)
+               local s= cal.sec
+               local ms_2= 1000*s+ (us/1000) -- Millisekunden in der neuen Minute
+               local c2= (cnt*ms_2)/ms_d -- Anteile in der neuen Minute
+               c2= c2>cnt and cnt or c2
+               c2= c2<0 and 0 or c2 -- bei Überlauf von ms_d               
+               local c1= cnt-c2
+               t[i-1]= t[i-1] and t[i-1]+c1 or c1
+               t[i]=   t[i]   and t[i]+c2   or c2
+               print('irPuls:',c1,c2,ms_d-ms_2,ms_2)
+            else -- ohne Abgleich
+               t[i]=   t[i]   and t[i]+cnt or cnt
+            end
             --            print('sum=',i,stunde[2],#stunde[2],t,t[i])
          end end end
 
