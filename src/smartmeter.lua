@@ -42,30 +42,29 @@ do
       end end
 
    -- Die Daten vom IRQ entgegennehmen und in die aktuelle stunde eintragen
-   local function irPuls(cnt,when,last) -- print ('irPuls',stunde,nr,q)
+   local function irPuls(cnt, when, last) -- print ('irPuls',stunde,nr,q)
       if stunde and type(stunde[2])=='table' then
-         cnt= cnt*6 -- umrechnung in WattMinuten
+         local c= cnt*6 -- umrechnung in WattMinuten muss local sein !!!
          local t,i,j= stunde[2],nr,nr_c -- nr ist der globale Zeiger auf die aktuelle minute
          if j then nr_c=false end -- sofort rücksetzen
          if i then
-         -- IRGENDOW hier ist ein gravierender Rechenfehler ;-)
-            --            if i>1 and j and last then -- mit Abgleich
-            --               local ms_d= (when-last+500)/1000 -- Millisekunden Abstand (Überlauf möglich)
-            --               ms_d= ms_d>0 and ms_d or 1 -- Division durch 0 verhindern
-            --               local uts,us= rtctime.get()
-            --               local cal= rtctime.epoch2cal(uts)
-            --               local s= cal.sec
-            --               local ms_2= 1000*s+ (us/1000) -- Millisekunden in der neuen Minute
-            --               local c2= (cnt*ms_2)/ms_d -- Anteile in der neuen Minute
-            --               c2= c2>cnt and cnt or c2
-            --               c2= c2<0 and 0 or c2 -- bei Überlauf von ms_d
-            --               local c1= cnt-c2
-            --               t[i-1]= t[i-1] and t[i-1]+c1 or c1
-            --               t[i]=   t[i]   and t[i]+c2   or c2
-            --               print('irPuls:',c1,c2,ms_d-ms_2,ms_2)
-            --            else -- ohne Abgleich
-            t[i]=   t[i]   and t[i]+cnt or cnt
-            --            end
+            if i>1 and nr_c and last then -- mit Abgleich            	 
+               local ms_d= (when-last+500)/1000 -- Millisekunden Abstand (Überlauf möglich)
+               ms_d= ms_d>0 and ms_d or 1 -- Division durch 0 verhindern 
+               local uts,us= rtctime.get()
+               local cal= rtctime.epoch2cal(uts)
+               local s= cal.sec
+               local ms_2= 1000*s+ (us/1000) -- Millisekunden in der neuen Minute
+               local c2= (c*ms_2)/ms_d -- Anteile in der neuen Minute
+               c2= c2>c and c or c2
+               c2= c2<0 and 0 or c2 -- bei Überlauf von ms_d               
+               local c1= c-c2
+               t[i-1]= t[i-1] and t[i-1]+c1 or c1
+               t[i]=   t[i]   and t[i]+c2   or c2
+               print('irPuls:',c,c1,c2,ms_d,ms_d-ms_2,ms_2)
+            else -- ohne Abgleich
+               t[i]=   t[i]   and t[i]+c or c
+            end
             --            print('sum=',i,stunde[2],#stunde[2],t,t[i])
          end
    end end
