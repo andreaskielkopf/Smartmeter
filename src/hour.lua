@@ -55,7 +55,7 @@ do
 --      return table.concat({'{"hour":', stunde, ', "ticks":[', table.concat(ticks), ']}'})
 --   end
 
-   -- speichert in das angegebene datum diesen stundendatensatz
+   -- speichert diesen Stunden-Datensatz in das angegebene Datum
    local function hourAppend(datum, stunde)
       local lua= table.concat({datum, '.lua'})
       if stunde and file.exists(lua) then

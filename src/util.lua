@@ -22,7 +22,7 @@ do
    --         else
    --            print(" "..k1.." \t= "..v1 ) end end end
 
-   -- Ermittle ob die datei als *.lua oder als *.lc Datei vorliegt, oder gar nicht
+   -- Ermittle ob die datei als .lua, .lc oder als .var -Datei vorliegt, oder gar nicht
    -- usage: filename=fName(a or b or c)
    local function fName(name)
       local lc= table.concat({name, '.lc'})
@@ -60,7 +60,7 @@ do
    --         fd:close()
    --      end end
 
-   -- Iterator über Zeilen einer Datei
+   -- Iterator über Zeilen einer Datei. Liefert immer genau eine Zeile, bis die Datei zuende ist
    local function nextLine(name)
       local i, fd= 0, nil -- Zeilennummer
       print ('iterator über:', name)
@@ -69,11 +69,10 @@ do
          if fd then i= i+1
             local line= fd:readline()
             if line then return i, line end -- iterator läuft weiter
-            fd:close() end
-         fd= nil i= nil -- close, end
-         print 'end iterator'
-         return nil end -- iterator beenden
-   end
+            fd:close() end fd= nil -- close, end
+         --print 'end iterator'
+      end end -- iterator beenden
+
 
    local function getObject(line)
       local text= table.concat({"return ", line}) -- zeile um "return " erweitern
@@ -81,6 +80,11 @@ do
       if chunk then err= nil return chunk() end -- wenn sie interpretierbar war, ausführen
       error(err) end -- fehler
 
+   -- Durchsucht die Zeile nach dem gewünschten Objekt
+   -- hour{'hallo',{1,2,3,4,5}}
+   -- oder nach einem namenlosen Objekt ( mit oder ohne führendes Komma )
+   -- ,{5,'temp',{105,12,24},'c°C'}'
+   -- Datensatz von 5 Uhr, Temperatur in centiGrad C
    local function getObj(oname, line)
       oname= oname or ''
       if line then
@@ -112,6 +116,7 @@ do
 
    -- Lösche solange Dateien im SPIFFS bis genug Platz frei ist
    local function cleanUp(soll)
+      if update then update() end -- vorher noch schnell prüfen, ob ein update ansteht
       soll= soll and soll>75000 and soll or 100000 -- halte 100kByte frei im Falle eines Updates
       local names, map= {}, file.list('[0-9-]+.lua') -- map(filename:size) von 2025-12-01.lua ...
       for key, _ in pairs(map) do names[#names+1]= key end -- filenamen zusammentragen die zu Tagen gehören
@@ -125,8 +130,11 @@ do
       end if update then update() end -- jetzt noch schnell prüfen, ob ein update ansteht
    end
 
-   -- welche monate oder tage gibt es als Dateien (als Info für den PC)
-   local function welche(name)
+   -- welche Monate oder Tage gibt es als Dateien (als Info für den PC)
+   -- "2025" listet die Monate im Jahr die vorhanden sind
+   -- "2025-01" listet die Tage im Monat Januar 2025 die Vorhanden sind
+   -- "2025-01-05" listet die Stunden die in der Dazei vom 5.1.2025 enthalten sind ???
+   local function welcheDateien(name)
       local monate, keys, z= {}, {}, #name==1 and 6 or 9 -- zeiger auf monat(6) oder tag(9)
       -- Die Variable "monat" wird auch für "tag" genutzt wenn z=9 ist
       name[#name+1]= '[0-9-]+.lua' -- regex hinzufügen
@@ -148,7 +156,7 @@ do
    --   M.getObject=getObject nur lokal
    M.getObj= getObj
    M.clean= cleanUp
-   M.welche= welche
+   M.welche= welcheDateien
    print 'end util'
    return M
 end

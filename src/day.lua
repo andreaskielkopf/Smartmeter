@@ -49,18 +49,6 @@ do
                end end end end
       return lines end
 
-   --   local function dayToBase64(day) -- consumer = verbraucht die daten und liefert ein array mit textzeilen
-   --      local lines={}
-   --      if day and day[1] then
-   --         lines[1]=table.concat({"date{'",day[1],"'}"})
-   --         local stunden=day[2]
-   --         if type(stunden)=='table' and #stunden>0 then
-   --            for i=0,24 do
-   --               if stunden[i] then
-   --                  lines[#lines+1]=hour_.toBase64(stunden[i])
-   --               end end end end
-   --      return lines end
-
    -- consumer = verbraucht die daten und liefert ein array mit textzeilen
    --      local function dayToJson(day)
    --         if day and day[1] then
@@ -85,7 +73,7 @@ do
    --            return lines end
    --      return {} end
 
-   -- erzeugt die datei für den aktuellen Tag
+   -- erzeugt die leere Datei für den aktuellen Tag
    local function dayCreate(datum)
       if not util_.fName(datum) and datum and #datum==10 then -- nur wenn es ein heute gibt
          -- print ('create day Lua:',datum,'\n', table.concat(dayToLua(getDay(datum)),'\n'))
