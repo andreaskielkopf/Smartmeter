@@ -1,6 +1,6 @@
 do
-   print "smartmeter m02"
-   ver[#ver+1]="m02"
+   print "smartmeter m03"
+   ver[#ver+1]="m03"
    local M= {}
    local hour_= require 'hour'
    local day_= require 'day'
@@ -30,6 +30,7 @@ do
          --         print('>',stunde,stunde_alt,stunde_neu,tag_alt)
          if stunde_alt~=stunde_neu then 
             hour_.append(tag_alt, stunde) -- stunde speichern 
+            if update then update() end -- schnell prüfen, ob ein update ansteht
             jetzt.stunde= stunde_neu
             if tag_alt~=tag_neu then -- tag anpassen
                day_.create(tag_neu) -- day_.compile(tag_alt)

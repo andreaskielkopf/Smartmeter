@@ -1,7 +1,7 @@
 -- Behandle den IRQ und lass zur Kontrolle die LED blinken
 do
-   print 'blinker b03'
-   ver[#ver+1]="b03"
+   print 'blinker b06'
+   ver[#ver+1]="b06"
    local ring=require 'ring'
    local function init()
       local pinGND,pinIR,pinLED,flanke= 2,3,4,"down" -- pinIR:1,2,3,5,6,7 pinGND:0,1,2,3,5,6,7 pinLED:4
@@ -27,9 +27,10 @@ do
             smart.irPuls(cnt)
          end
          if ring and ring.push and last then do            
-               if cnt~=1 then ring.push('overrun') ring.push(cnt) end
+               if cnt~=1 then ring.push(':') ring.push(cnt) end
                local zeit= when-last
-               ring.push(level==0 and zeit or -zeit)
+--               ring.push(level==0 and zeit or -zeit)
+               ring.push(string.format("%x", when/0x10000))
             end end 
          last= when
          gpio.write(pinLED, gpio.HIGH) -- hide LED

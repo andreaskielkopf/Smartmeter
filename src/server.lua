@@ -1,13 +1,13 @@
 -- Http Server für Smartmeter Daten
 do
-   print "server s03"
-   ver[#ver+1]="s03"
+   print "server s044"
+   ver[#ver+1]="s04"
    local M= {}
    local sm= require 'smartmeter'
    local ring= require 'ring'
    local sm_    = '/smartmeter'
    local sm_heap= table.concat({sm_, "/heap"})
-   local sm_vers= table.concat({sm_, "/version"})
+   local sm_vers= table.concat({sm_, "/version"}) -- und update
    local sm_data= table.concat({sm_, "/data"})
    local sm_ring= table.concat({sm_, "/ring"})
    local usage= table.concat({"<html><body><h1>NodeMCU</h1><p>Use ", sm_, "</p></body></html>"})
@@ -24,6 +24,7 @@ do
          if pfad:find(sm_heap) then
             return table.concat({'{"Heap":', node.heap(), '}'})  -- tailcall
          elseif pfad:find(sm_vers) then
+            if update then update() end -- vorher noch schnell prüfen, ob ein update ansteht
             return table.concat({'{"Version":', table.concat(ver,"-"), '}'})  -- tailcall
          elseif ring and ring.get and pfad:find(sm_ring) then
             return table.concat({'{"Ring":', ring.get(pfad:match("/ring(.*)")), '}'}, '\n')  -- tailcall ???
