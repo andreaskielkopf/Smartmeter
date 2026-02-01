@@ -2,8 +2,8 @@
 -- IR ein sind positive Zahlen
 -- IR aus sind negative Zahlen
 do
-   print 'ring r02'
-   ver[#ver+1]= "r02"
+   print 'ring r03'
+   ver[#ver+1]= "r03"
    M= {}
    local buf= {} -- tabelle für den Ringtbuffer mit den Zeiten
    local inp,out,max,overflow,overrun -- zeiger und anderes
@@ -15,7 +15,7 @@ do
    -- init
    local function init()
       print 'init ring'
-      inp,out,max, overflow,overrun= 0,0,500, false,false
+      inp,out,max, overflow,overrun= 0,0,100, false,false
       for i=1,max do buf[i]= i end end-- init array
    
    -- holt eine Zahl aus dem Puffer oder nil
