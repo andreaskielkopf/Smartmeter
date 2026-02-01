@@ -1,5 +1,6 @@
 do
-   print "load smartmeter"
+   print "smartmeter m02"
+   ver[#ver+1]="m02"
    local M= {}
    local hour_= require 'hour'
    local day_= require 'day'

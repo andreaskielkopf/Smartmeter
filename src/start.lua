@@ -1,6 +1,8 @@
 -- Auswahl der verschiedenen Funktionen die bereits programmiert wurden
 do
    node.flashindex("_init")() -- LFS
+   print "start i02"
+   ver={"i02"} -- Tabelle mit den Versionsnummern
    update= require 'updateLFS' -- globale funktion update aufrufen
    connect= require 'connect' -- Wifi-Verbindung herstellen
    if connect.gotIP() then -- Das ist zwar aufwändig, spart aber Heap !!!

@@ -1,13 +1,15 @@
 -- Http Server für Smartmeter Daten
 do
-   print "load server"
+   print "server s03"
+   ver[#ver+1]="s03"
    local M= {}
    local sm= require 'smartmeter'
-   -- local ring= require 'ring'
+   local ring= require 'ring'
    local sm_    = '/smartmeter'
    local sm_heap= table.concat({sm_, "/heap"})
+   local sm_vers= table.concat({sm_, "/version"})
    local sm_data= table.concat({sm_, "/data"})
-   --   local sm_ring= table.concat({sm_, "/ring"})
+   local sm_ring= table.concat({sm_, "/ring"})
    local usage= table.concat({"<html><body><h1>NodeMCU</h1><p>Use ", sm_, "</p></body></html>"})
 
    -- erzeuge ein response mit dem richtigen Rahmen
@@ -21,10 +23,12 @@ do
       if pfad then
          if pfad:find(sm_heap) then
             return table.concat({'{"Heap":', node.heap(), '}'})  -- tailcall
+         elseif pfad:find(sm_vers) then
+            return table.concat({'{"Version":', table.concat(ver,"-"), '}'})  -- tailcall
+         elseif ring and ring.get and pfad:find(sm_ring) then
+            return table.concat({'{"Ring":', ring.get(pfad:match("/ring(.*)")), '}'}, '\n')  -- tailcall ???
          elseif sm and sm.data and pfad:find(sm_data) then
             return table.concat({'{"Data":', sm.data(pfad:match("/data(.*)")), '}'}, '\n')  -- tailcall
-               --         elseif ring and ring.get and pfad:find(sm_ring) then
-               --            return table.concat({'{"Ring":', ring.get(pfad:match("/ring(.*)")), '}'}, '\n')  -- tailcall ???
          elseif pfad:find(sm_) then
             return table.concat({'{"', sm_, '/{heap, data, data/store, data/2025/12/01, ring}'})  -- tailcall
          end end
@@ -52,7 +56,7 @@ do
       end )
       print "HTTP server running on port 80" end
 
-   init()   
+   init()
    print "end server"
    return M
 end

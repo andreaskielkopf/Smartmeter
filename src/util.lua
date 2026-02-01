@@ -1,6 +1,7 @@
 -- Einige eigene Funktionen die mehrfach verwendet werden
 do
-   print 'load util'
+   print 'util u02'
+   ver[#ver+1]="u02"
    local M= {}
 
    --   local function print3d(v0)
